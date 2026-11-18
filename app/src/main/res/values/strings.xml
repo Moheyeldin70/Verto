@@ -1,0 +1,109 @@
+<resources>
+    <string name="app_name">Verto</string>
+
+    <!-- Navigation Tabs -->
+    <string name="tab_units">Units</string>
+    <string name="tab_currency">Currency</string>
+    <string name="tab_metals">Gold &amp; Silver</string>
+
+    <!-- Status & Top Bar -->
+    <string name="status_live">Live</string>
+    <string name="status_cached">Offline Cache</string>
+    <string name="status_syncing">Updating…</string>
+    <string name="action_refresh">Refresh rates</string>
+    <string name="action_language">Language</string>
+    <string name="action_theme">Theme</string>
+    <string name="action_swap">Swap</string>
+    <string name="action_copy">Copy</string>
+    <string name="action_save">Save</string>
+    <string name="action_saved">Saved</string>
+    <string name="action_clear">Clear</string>
+    <string name="action_close">Close</string>
+
+    <!-- Theme Options -->
+    <string name="theme_system">System Default</string>
+    <string name="theme_light">Light Mode</string>
+    <string name="theme_dark">Dark Mode</string>
+    <string name="choose_theme">Appearance</string>
+    <string name="choose_language">Language</string>
+    <string name="language_system">Device Language</string>
+
+    <!-- Unit Converter -->
+    <string name="unit_converter_title">Unit Converter</string>
+    <string name="from_label">From</string>
+    <string name="to_label">To</string>
+    <string name="enter_value">Enter value</string>
+    <string name="formula_label">Formula</string>
+    <string name="unit_graph_title">Visual Comparison &amp; Curve</string>
+    <string name="chart_mode_bars">Scale Bars</string>
+    <string name="chart_mode_curve">Function Curve</string>
+    <string name="all_conversions_title">All Equivalent Units</string>
+    <string name="select_unit">Select Unit</string>
+    <string name="search_units">Search units…</string>
+
+    <!-- Unit Categories -->
+    <string name="cat_length">Length</string>
+    <string name="cat_mass">Mass</string>
+    <string name="cat_temperature">Temperature</string>
+    <string name="cat_area">Area</string>
+    <string name="cat_volume">Volume</string>
+    <string name="cat_speed">Speed</string>
+    <string name="cat_time">Time</string>
+    <string name="cat_data">Digital Data</string>
+    <string name="cat_pressure">Pressure</string>
+    <string name="cat_energy">Energy</string>
+    <string name="cat_power">Power</string>
+    <string name="cat_angle">Angle</string>
+    <string name="cat_fuel">Fuel Economy</string>
+
+    <!-- Currency Converter -->
+    <string name="currency_converter_title">Global Currency</string>
+    <string name="select_currency">Select Currency</string>
+    <string name="search_currencies">Search 165+ currencies or codes…</string>
+    <string name="exchange_rate_label">Exchange Rate</string>
+    <string name="inverse_rate_label">Inverse</string>
+    <string name="last_updated_label">Updated</string>
+    <string name="historical_chart_title">Historical Rate Trend</string>
+    <string name="saved_pairs_title">Saved Conversions</string>
+    <string name="popular_currencies_title">Major World Currencies</string>
+    <string name="no_saved_yet">Tap Save to pin frequent conversions for quick offline access.</string>
+    <string name="offline_banner">Offline mode — displaying cached exchange rates</string>
+    <string name="range_7d">7D</string>
+    <string name="range_1m">1M</string>
+    <string name="range_3m">3M</string>
+    <string name="range_1y">1Y</string>
+    <string name="period_high">High</string>
+    <string name="period_low">Low</string>
+    <string name="period_change">Change</string>
+
+    <!-- Gold & Silver Tracker -->
+    <string name="metals_title">Gold &amp; Silver Tracker</string>
+    <string name="gold_label">Gold (XAU)</string>
+    <string name="silver_label">Silver (XAG)</string>
+    <string name="gold_silver_ratio">Gold / Silver Ratio</string>
+    <string name="country_label">Country / Market</string>
+    <string name="select_country">Select Country</string>
+    <string name="search_countries">Search any country or currency…</string>
+    <string name="spot_oz_label">Spot / Troy Oz</string>
+    <string name="gram_24k_label">24K Gold / g</string>
+    <string name="gram_22k_label">22K Gold / g</string>
+    <string name="gram_21k_label">21K Gold / g</string>
+    <string name="gram_18k_label">18K Gold / g</string>
+    <string name="gram_14k_label">14K Gold / g</string>
+    <string name="silver_999_label">999 Fine Silver / g</string>
+    <string name="silver_925_label">925 Sterling / g</string>
+    <string name="silver_900_label">900 Coin Silver / g</string>
+    <string name="silver_800_label">800 Silver / g</string>
+    <string name="kilogram_label">1 Kilogram</string>
+    <string name="local_unit_label">Local Unit</string>
+    <string name="purity_breakdown_title">Purity &amp; Weight Breakdown</string>
+    <string name="metal_chart_title">Live Market Trend</string>
+    <string name="global_markets_title">Global Country Snapshot</string>
+    <string name="weight_calculator_title">Bullion Value Calculator</string>
+    <string name="weight_grams_hint">Weight in grams</string>
+    <string name="purity_label">Purity</string>
+    <string name="estimated_value">Estimated Value</string>
+    <string name="live_polling_note">Auto-refreshing every 30s</string>
+    <string name="copied_feedback">Copied to clipboard</string>
+    <string name="no_results">No matching results</string>
+</resources>

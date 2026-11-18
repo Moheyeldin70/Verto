@@ -1,0 +1,109 @@
+<resources>
+    <string name="app_name">Verto</string>
+
+    <!-- Navigation Tabs -->
+    <string name="tab_units">単位</string>
+    <string name="tab_currency">通貨</string>
+    <string name="tab_metals">金・銀価格</string>
+
+    <!-- Status & Top Bar -->
+    <string name="status_live">リアルタイム</string>
+    <string name="status_cached">オフライン</string>
+    <string name="status_syncing">更新中…</string>
+    <string name="action_refresh">レートを更新</string>
+    <string name="action_language">言語</string>
+    <string name="action_theme">テーマ</string>
+    <string name="action_swap">入れ替え</string>
+    <string name="action_copy">コピー</string>
+    <string name="action_save">保存</string>
+    <string name="action_saved">保存済み</string>
+    <string name="action_clear">クリア</string>
+    <string name="action_close">閉じる</string>
+
+    <!-- Theme Options -->
+    <string name="theme_system">システム設定</string>
+    <string name="theme_light">ライトモード</string>
+    <string name="theme_dark">ダークモード</string>
+    <string name="choose_theme">外観</string>
+    <string name="choose_language">言語</string>
+    <string name="language_system">端末の言語</string>
+
+    <!-- Unit Converter -->
+    <string name="unit_converter_title">単位変換</string>
+    <string name="from_label">変換元</string>
+    <string name="to_label">変換先</string>
+    <string name="enter_value">数値を入力</string>
+    <string name="formula_label">計算式</string>
+    <string name="unit_graph_title">視覚比較＆グラフ</string>
+    <string name="chart_mode_bars">スケール比較</string>
+    <string name="chart_mode_curve">変換曲線</string>
+    <string name="all_conversions_title">すべての換算値</string>
+    <string name="select_unit">単位を選択</string>
+    <string name="search_units">単位を検索…</string>
+
+    <!-- Unit Categories -->
+    <string name="cat_length">長さ</string>
+    <string name="cat_mass">質量</string>
+    <string name="cat_temperature">温度</string>
+    <string name="cat_area">面積</string>
+    <string name="cat_volume">体積</string>
+    <string name="cat_speed">速度</string>
+    <string name="cat_time">時間</string>
+    <string name="cat_data">データ容量</string>
+    <string name="cat_pressure">圧力</string>
+    <string name="cat_energy">エネルギー</string>
+    <string name="cat_power">仕事率</string>
+    <string name="cat_angle">角度</string>
+    <string name="cat_fuel">燃費</string>
+
+    <!-- Currency Converter -->
+    <string name="currency_converter_title">世界通貨変換</string>
+    <string name="select_currency">通貨を選択</string>
+    <string name="search_currencies">165以上の通貨を検索…</string>
+    <string name="exchange_rate_label">為替レート</string>
+    <string name="inverse_rate_label">逆レート</string>
+    <string name="last_updated_label">更新日時</string>
+    <string name="historical_chart_title">為替レート推移</string>
+    <string name="saved_pairs_title">保存した変換</string>
+    <string name="popular_currencies_title">主要通貨レート</string>
+    <string name="no_saved_yet">「保存」をタップするとオフラインでもすぐに確認できます。</string>
+    <string name="offline_banner">オフラインモード — キャッシュされたレートを表示中</string>
+    <string name="range_7d">7日</string>
+    <string name="range_1m">1ヶ月</string>
+    <string name="range_3m">3ヶ月</string>
+    <string name="range_1y">1年</string>
+    <string name="period_high">高値</string>
+    <string name="period_low">安値</string>
+    <string name="period_change">変動</string>
+
+    <!-- Gold & Silver Tracker -->
+    <string name="metals_title">金・銀価格トラッカー</string>
+    <string name="gold_label">金 (XAU)</string>
+    <string name="silver_label">銀 (XAG)</string>
+    <string name="gold_silver_ratio">金・銀比価</string>
+    <string name="country_label">国・市場</string>
+    <string name="select_country">国を選択</string>
+    <string name="search_countries">国または通貨を検索…</string>
+    <string name="spot_oz_label">スポット / トロイオンス</string>
+    <string name="gram_24k_label">24金 (K24) / g</string>
+    <string name="gram_22k_label">22金 (K22) / g</string>
+    <string name="gram_21k_label">21金 (K21) / g</string>
+    <string name="gram_18k_label">18金 (K18) / g</string>
+    <string name="gram_14k_label">14金 (K14) / g</string>
+    <string name="silver_999_label">純銀 999 / g</string>
+    <string name="silver_925_label">スターリング 925 / g</string>
+    <string name="silver_900_label">900銀 / g</string>
+    <string name="silver_800_label">800銀 / g</string>
+    <string name="kilogram_label">1キログラム</string>
+    <string name="local_unit_label">現地単位</string>
+    <string name="purity_breakdown_title">純度・重量別価格</string>
+    <string name="metal_chart_title">リアルタイム推移</string>
+    <string name="global_markets_title">各国の貴金属価格</string>
+    <string name="weight_calculator_title">地金価値計算機</string>
+    <string name="weight_grams_hint">重量 (グラム)</string>
+    <string name="purity_label">純度</string>
+    <string name="estimated_value">推定価値</string>
+    <string name="live_polling_note">30秒ごとに自動更新</string>
+    <string name="copied_feedback">クリップボードにコピーしました</string>
+    <string name="no_results">一致する結果がありません</string>
+</resources>

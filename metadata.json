@@ -1,0 +1,6 @@
+{
+  "name": "Verto",
+  "description": "Real-time unit, global currency, and gold & silver price converter with interactive charts, offline caching, dark mode, and multilingual support.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

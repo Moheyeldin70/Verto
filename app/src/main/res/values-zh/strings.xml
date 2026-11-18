@@ -1,0 +1,109 @@
+<resources>
+    <string name="app_name">Verto</string>
+
+    <!-- Navigation Tabs -->
+    <string name="tab_units">单位换算</string>
+    <string name="tab_currency">货币汇率</string>
+    <string name="tab_metals">黄金白银</string>
+
+    <!-- Status & Top Bar -->
+    <string name="status_live">实时</string>
+    <string name="status_cached">离线缓存</string>
+    <string name="status_syncing">更新中…</string>
+    <string name="action_refresh">刷新汇率</string>
+    <string name="action_language">语言</string>
+    <string name="action_theme">主题</string>
+    <string name="action_swap">互换</string>
+    <string name="action_copy">复制</string>
+    <string name="action_save">收藏</string>
+    <string name="action_saved">已收藏</string>
+    <string name="action_clear">清除</string>
+    <string name="action_close">关闭</string>
+
+    <!-- Theme Options -->
+    <string name="theme_system">跟随系统</string>
+    <string name="theme_light">浅色模式</string>
+    <string name="theme_dark">深色模式</string>
+    <string name="choose_theme">外观设置</string>
+    <string name="choose_language">选择语言</string>
+    <string name="language_system">系统语言</string>
+
+    <!-- Unit Converter -->
+    <string name="unit_converter_title">单位换算器</string>
+    <string name="from_label">从</string>
+    <string name="to_label">到</string>
+    <string name="enter_value">输入数值</string>
+    <string name="formula_label">换算公式</string>
+    <string name="unit_graph_title">可视化对比与曲线</string>
+    <string name="chart_mode_bars">比例柱状图</string>
+    <string name="chart_mode_curve">换算曲线</string>
+    <string name="all_conversions_title">全部等效单位</string>
+    <string name="select_unit">选择单位</string>
+    <string name="search_units">搜索单位…</string>
+
+    <!-- Unit Categories -->
+    <string name="cat_length">长度</string>
+    <string name="cat_mass">质量</string>
+    <string name="cat_temperature">温度</string>
+    <string name="cat_area">面积</string>
+    <string name="cat_volume">体积</string>
+    <string name="cat_speed">速度</string>
+    <string name="cat_time">时间</string>
+    <string name="cat_data">数据存储</string>
+    <string name="cat_pressure">压力</string>
+    <string name="cat_energy">能量</string>
+    <string name="cat_power">功率</string>
+    <string name="cat_angle">角度</string>
+    <string name="cat_fuel">油耗</string>
+
+    <!-- Currency Converter -->
+    <string name="currency_converter_title">全球货币换算</string>
+    <string name="select_currency">选择货币</string>
+    <string name="search_currencies">搜索 165+ 种货币或代码…</string>
+    <string name="exchange_rate_label">实时汇率</string>
+    <string name="inverse_rate_label">反向汇率</string>
+    <string name="last_updated_label">更新时间</string>
+    <string name="historical_chart_title">历史汇率走势</string>
+    <string name="saved_pairs_title">已保存换算</string>
+    <string name="popular_currencies_title">全球主要货币</string>
+    <string name="no_saved_yet">点击收藏即可保存常用换算，离线时也能快速查看。</string>
+    <string name="offline_banner">离线模式 — 正在显示缓存汇率</string>
+    <string name="range_7d">7天</string>
+    <string name="range_1m">1个月</string>
+    <string name="range_3m">3个月</string>
+    <string name="range_1y">1年</string>
+    <string name="period_high">最高</string>
+    <string name="period_low">最低</string>
+    <string name="period_change">涨跌幅</string>
+
+    <!-- Gold & Silver Tracker -->
+    <string name="metals_title">黄金与白银价格</string>
+    <string name="gold_label">黄金 (XAU)</string>
+    <string name="silver_label">白银 (XAG)</string>
+    <string name="gold_silver_ratio">金银比</string>
+    <string name="country_label">国家 / 市场</string>
+    <string name="select_country">选择国家</string>
+    <string name="search_countries">搜索任意国家或货币…</string>
+    <string name="spot_oz_label">现货 / 金衡盎司</string>
+    <string name="gram_24k_label">24K 黄金 / 克</string>
+    <string name="gram_22k_label">22K 黄金 / 克</string>
+    <string name="gram_21k_label">21K 黄金 / 克</string>
+    <string name="gram_18k_label">18K 黄金 / 克</string>
+    <string name="gram_14k_label">14K 黄金 / 克</string>
+    <string name="silver_999_label">999 纯银 / 克</string>
+    <string name="silver_925_label">925 银 / 克</string>
+    <string name="silver_900_label">900 银 / 克</string>
+    <string name="silver_800_label">800 银 / 克</string>
+    <string name="kilogram_label">1 千克</string>
+    <string name="local_unit_label">本地单位</string>
+    <string name="purity_breakdown_title">纯度与重量报价</string>
+    <string name="metal_chart_title">实时市场走势</string>
+    <string name="global_markets_title">全球各国市场参考</string>
+    <string name="weight_calculator_title">贵金属克重计算器</string>
+    <string name="weight_grams_hint">重量（克）</string>
+    <string name="purity_label">纯度</string>
+    <string name="estimated_value">预估价值</string>
+    <string name="live_polling_note">每 30 秒自动刷新</string>
+    <string name="copied_feedback">已复制到剪贴板</string>
+    <string name="no_results">未找到匹配结果</string>
+</resources>

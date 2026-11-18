@@ -1,0 +1,109 @@
+<resources>
+    <string name="app_name">فيرتو</string>
+
+    <!-- Navigation Tabs -->
+    <string name="tab_units">الوحدات</string>
+    <string name="tab_currency">العملات</string>
+    <string name="tab_metals">الذهب والفضة</string>
+
+    <!-- Status & Top Bar -->
+    <string name="status_live">مباشر</string>
+    <string name="status_cached">وضع عدم الاتصال</string>
+    <string name="status_syncing">جاري التحديث…</string>
+    <string name="action_refresh">تحديث الأسعار</string>
+    <string name="action_language">اللغة</string>
+    <string name="action_theme">المظهر</string>
+    <string name="action_swap">تبديل</string>
+    <string name="action_copy">نسخ</string>
+    <string name="action_save">حفظ</string>
+    <string name="action_saved">محفوظ</string>
+    <string name="action_clear">مسح</string>
+    <string name="action_close">إغلاق</string>
+
+    <!-- Theme Options -->
+    <string name="theme_system">تلقائي (النظام)</string>
+    <string name="theme_light">الوضع الفاتح</string>
+    <string name="theme_dark">الوضع الداكن</string>
+    <string name="choose_theme">المظهر</string>
+    <string name="choose_language">اللغة</string>
+    <string name="language_system">لغة الجهاز</string>
+
+    <!-- Unit Converter -->
+    <string name="unit_converter_title">محول الوحدات</string>
+    <string name="from_label">من</string>
+    <string name="to_label">إلى</string>
+    <string name="enter_value">أدخل القيمة</string>
+    <string name="formula_label">المعادلة</string>
+    <string name="unit_graph_title">المقارنة البصرية والمنحنى</string>
+    <string name="chart_mode_bars">أشرطة القياس</string>
+    <string name="chart_mode_curve">منحنى التحويل</string>
+    <string name="all_conversions_title">جميع الوحدات المكافئة</string>
+    <string name="select_unit">اختر الوحدة</string>
+    <string name="search_units">ابحث عن وحدة…</string>
+
+    <!-- Unit Categories -->
+    <string name="cat_length">الطول</string>
+    <string name="cat_mass">الكتلة</string>
+    <string name="cat_temperature">الحرارة</string>
+    <string name="cat_area">المساحة</string>
+    <string name="cat_volume">الحجم</string>
+    <string name="cat_speed">السرعة</string>
+    <string name="cat_time">الوقت</string>
+    <string name="cat_data">البيانات الرقمية</string>
+    <string name="cat_pressure">الضغط</string>
+    <string name="cat_energy">الطاقة</string>
+    <string name="cat_power">القدرة</string>
+    <string name="cat_angle">الزاوية</string>
+    <string name="cat_fuel">استهلاك الوقود</string>
+
+    <!-- Currency Converter -->
+    <string name="currency_converter_title">العملات العالمية</string>
+    <string name="select_currency">اختر العملة</string>
+    <string name="search_currencies">ابحث عن أكثر من ١٦٥ عملة…</string>
+    <string name="exchange_rate_label">سعر الصرف</string>
+    <string name="inverse_rate_label">السعر العكسي</string>
+    <string name="last_updated_label">آخر تحديث</string>
+    <string name="historical_chart_title">مؤشر سعر الصرف التاريخي</string>
+    <string name="saved_pairs_title">التحويلات المحفوظة</string>
+    <string name="popular_currencies_title">العملات العالمية الرئيسية</string>
+    <string name="no_saved_yet">اضغط حفظ لتثبيت التحويلات المتكررة للوصول السريع دون اتصال.</string>
+    <string name="offline_banner">وضع عدم الاتصال — عرض أسعار الصرف المخزنة مؤقتاً</string>
+    <string name="range_7d">٧ أيام</string>
+    <string name="range_1m">شهر</string>
+    <string name="range_3m">٣ أشهر</string>
+    <string name="range_1y">سنة</string>
+    <string name="period_high">الأعلى</string>
+    <string name="period_low">الأدنى</string>
+    <string name="period_change">التغير</string>
+
+    <!-- Gold & Silver Tracker -->
+    <string name="metals_title">متابع الذهب والفضة</string>
+    <string name="gold_label">الذهب (XAU)</string>
+    <string name="silver_label">الفضة (XAG)</string>
+    <string name="gold_silver_ratio">نسبة الذهب / الفضة</string>
+    <string name="country_label">الدولة / السوق</string>
+    <string name="select_country">اختر الدولة</string>
+    <string name="search_countries">ابحث عن أي دولة أو عملة…</string>
+    <string name="spot_oz_label">السعر الفوري / أونصة</string>
+    <string name="gram_24k_label">ذهب عيار ٢٤ / غرام</string>
+    <string name="gram_22k_label">ذهب عيار ٢٢ / غرام</string>
+    <string name="gram_21k_label">ذهب عيار ٢١ / غرام</string>
+    <string name="gram_18k_label">ذهب عيار ١٨ / غرام</string>
+    <string name="gram_14k_label">ذهب عيار ١٤ / غرام</string>
+    <string name="silver_999_label">فضة نقية ٩٩٩ / غرام</string>
+    <string name="silver_925_label">فضة استرليني ٩٢٥ / غرام</string>
+    <string name="silver_900_label">فضة ٩٠٠ / غرام</string>
+    <string name="silver_800_label">فضة ٨٠٠ / غرام</string>
+    <string name="kilogram_label">١ كيلوغرام</string>
+    <string name="local_unit_label">الوحدة المحلية</string>
+    <string name="purity_breakdown_title">تفاصيل العيارات والأوزان</string>
+    <string name="metal_chart_title">اتجاه السوق المباشر</string>
+    <string name="global_markets_title">الأسعار في دول العالم</string>
+    <string name="weight_calculator_title">حاسبة قيمة السبائك</string>
+    <string name="weight_grams_hint">الوزن بالغرام</string>
+    <string name="purity_label">العيار</string>
+    <string name="estimated_value">القيمة التقديرية</string>
+    <string name="live_polling_note">تحديث تلقائي كل ٣٠ ثانية</string>
+    <string name="copied_feedback">تم النسخ إلى الحافظة</string>
+    <string name="no_results">لا توجد نتائج مطابقة</string>
+</resources>
