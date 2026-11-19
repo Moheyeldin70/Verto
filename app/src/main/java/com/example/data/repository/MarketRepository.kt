@@ -10,7 +10,10 @@ import com.example.data.local.ConverterDao
 import com.example.data.local.SavedConversionEntity
 import com.example.data.remote.MarketApiService
 import com.example.domain.CurrencyCatalog
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -20,6 +23,7 @@ import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import java.util.concurrent.ConcurrentHashMap
 
 enum class ChartRange(val days: Int) {
   D7(7),
@@ -44,8 +48,24 @@ class MarketRepository(
   val metalPricesFlow: Flow<List<CachedMetalPriceEntity>> = dao.observeMetalPrices()
   val savedConversionsFlow: Flow<List<SavedConversionEntity>> = dao.observeSavedConversions()
 
+  private val repoScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+  private val chartMemoryCache = ConcurrentHashMap<String, List<CachedChartPointEntity>>()
+  private val usdSnapshotCache = ConcurrentHashMap<String, Map<String, Double>>()
+  private val inFlightDateFetches = ConcurrentHashMap<String, Deferred<Map<String, Double>?>>()
+
   fun observeChartPoints(seriesKey: String): Flow<List<CachedChartPointEntity>> =
     dao.observeChartPoints(seriesKey)
+
+  suspend fun getCachedChartPoints(seriesKey: String): List<CachedChartPointEntity> {
+    chartMemoryCache[seriesKey]?.let { if (it.size >= 2) return it }
+    return withContext(Dispatchers.IO) {
+      val dbPoints = dao.getChartPoints(seriesKey)
+      if (dbPoints.size >= 2) {
+        chartMemoryCache[seriesKey] = dbPoints
+      }
+      dbPoints
+    }
+  }
 
   fun isNetworkAvailable(): Boolean {
     val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager ?: return false
@@ -199,55 +219,29 @@ class MarketRepository(
       val seriesKey = "FX_${from}_${to}_${range.name}"
       if (from == to) {
         val flat = buildFlatSeries(seriesKey, 1.0, range)
+        chartMemoryCache[seriesKey] = flat
         dao.replaceChartSeries(seriesKey, flat)
         return@withContext flat
       }
       if (!isNetworkAvailable()) {
-        return@withContext dao.getChartPoints(seriesKey)
+        return@withContext getCachedChartPoints(seriesKey)
       }
 
-      val dateFmt = SimpleDateFormat("yyyy-MM-dd", Locale.US)
-      val labelFmt = SimpleDateFormat("MMM d", Locale.US)
-      val cal = Calendar.getInstance()
-      val endDate = dateFmt.format(cal.time)
-      cal.add(Calendar.DAY_OF_YEAR, -range.days)
-      val startDate = dateFmt.format(cal.time)
-
-      // Try Frankfurter first (fast single call for major currencies)
-      try {
-        val resp = api.getFrankfurterSeries("${startDate}..${endDate}", from, to)
-        val ratesMap = resp.rates
-        if (!ratesMap.isNullOrEmpty()) {
-          val sorted = ratesMap.entries.sortedBy { it.key }
-          val points =
-            sorted.mapIndexedNotNull { idx, entry ->
-              val v = entry.value[to] ?: return@mapIndexedNotNull null
-              val parsedDate = runCatching { dateFmt.parse(entry.key) }.getOrNull()
-              CachedChartPointEntity(
-                id = "${seriesKey}_$idx",
-                seriesKey = seriesKey,
-                pointIndex = idx,
-                timestampMillis = parsedDate?.time ?: System.currentTimeMillis(),
-                value = v,
-                label = parsedDate?.let { labelFmt.format(it) } ?: entry.key,
-              )
-            }
-          if (points.size >= 2) {
-            dao.replaceChartSeries(seriesKey, points)
-            return@withContext points
-          }
-        }
-      } catch (_: Exception) {
-        // Fallback to sampled dated snapshots for all 165+ currencies
+      // 1. Try Frankfurter 1Y single-shot call and slice all 4 ranges (7D, 1M, 3M, 1Y) at once
+      val frankfurterLoaded = tryFetchFrankfurterAllRanges(from, to)
+      if (frankfurterLoaded) {
+        chartMemoryCache[seriesKey]?.let { if (it.size >= 2) return@withContext it }
       }
 
+      // 2. Fallback to dated jsDelivr snapshots with shared in-memory date cache
       val sampled = fetchDatedCurrencySnapshots(seriesKey, from, to, range)
       if (sampled.size >= 2) {
+        chartMemoryCache[seriesKey] = sampled
         dao.replaceChartSeries(seriesKey, sampled)
         return@withContext sampled
       }
 
-      dao.getChartPoints(seriesKey)
+      getCachedChartPoints(seriesKey)
     }
 
   suspend fun fetchMetalHistory(
@@ -258,17 +252,163 @@ class MarketRepository(
     withContext(Dispatchers.IO) {
       val seriesKey = "METAL_${metalCode}_${currencyCode}_${range.name}"
       if (!isNetworkAvailable()) {
-        return@withContext dao.getChartPoints(seriesKey)
+        return@withContext getCachedChartPoints(seriesKey)
       }
 
       val points = fetchDatedMetalSnapshots(seriesKey, metalCode, currencyCode, range)
       if (points.size >= 2) {
+        chartMemoryCache[seriesKey] = points
         dao.replaceChartSeries(seriesKey, points)
         return@withContext points
       }
 
-      dao.getChartPoints(seriesKey)
+      getCachedChartPoints(seriesKey)
     }
+
+  suspend fun prefetchCurrencyRanges(from: String, to: String, exclude: ChartRange) =
+    withContext(Dispatchers.IO) {
+      if (!isNetworkAvailable() || from == to) return@withContext
+      // If Frankfurter already populated all 4 ranges in memory, we're done immediately
+      val allCached =
+        ChartRange.entries.all { r -> chartMemoryCache["FX_${from}_${to}_${r.name}"]?.size ?: 0 >= 2 }
+      if (allCached) return@withContext
+
+      ChartRange.entries
+        .filter { it != exclude }
+        .forEach { range ->
+          val key = "FX_${from}_${to}_${range.name}"
+          if ((chartMemoryCache[key]?.size ?: 0) < 2) {
+            val pts = fetchDatedCurrencySnapshots(key, from, to, range)
+            if (pts.size >= 2) {
+              chartMemoryCache[key] = pts
+              dao.replaceChartSeries(key, pts)
+            }
+          }
+        }
+    }
+
+  suspend fun prefetchMetalRanges(metalCode: String, currencyCode: String, exclude: ChartRange) =
+    withContext(Dispatchers.IO) {
+      if (!isNetworkAvailable()) return@withContext
+      ChartRange.entries
+        .filter { it != exclude }
+        .forEach { range ->
+          val key = "METAL_${metalCode}_${currencyCode}_${range.name}"
+          if ((chartMemoryCache[key]?.size ?: 0) < 2) {
+            val pts = fetchDatedMetalSnapshots(key, metalCode, currencyCode, range)
+            if (pts.size >= 2) {
+              chartMemoryCache[key] = pts
+              dao.replaceChartSeries(key, pts)
+            }
+          }
+        }
+    }
+
+  private suspend fun tryFetchFrankfurterAllRanges(from: String, to: String): Boolean {
+    return try {
+      val dateFmt = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+      val labelFmt = SimpleDateFormat("MMM d", Locale.US)
+      val cal = Calendar.getInstance()
+      val endMillis = cal.timeInMillis
+      val endDate = dateFmt.format(cal.time)
+      cal.add(Calendar.DAY_OF_YEAR, -ChartRange.Y1.days)
+      val startDate = dateFmt.format(cal.time)
+
+      val resp = api.getFrankfurterSeries("${startDate}..${endDate}", from, to)
+      val ratesMap = resp.rates ?: return false
+      if (ratesMap.isEmpty()) return false
+
+      val allEntries =
+        ratesMap.entries
+          .sortedBy { it.key }
+          .mapNotNull { entry ->
+            val v = entry.value[to] ?: return@mapNotNull null
+            val parsed = dateFmt.parse(entry.key) ?: return@mapNotNull null
+            Triple(parsed.time, labelFmt.format(parsed), v)
+          }
+      if (allEntries.size < 2) return false
+
+      for (range in ChartRange.entries) {
+        val cutoff = endMillis - (range.days.toLong() * 86_400_000L)
+        val sliced = allEntries.filter { it.first >= cutoff }.let { list ->
+          if (list.size >= 2) list else allEntries.takeLast(minOf(5, allEntries.size))
+        }
+        val key = "FX_${from}_${to}_${range.name}"
+        val entities =
+          sliced.mapIndexed { idx, (ts, lbl, v) ->
+            CachedChartPointEntity(
+              id = "${key}_$idx",
+              seriesKey = key,
+              pointIndex = idx,
+              timestampMillis = ts,
+              value = v,
+              label = lbl,
+            )
+          }
+        chartMemoryCache[key] = entities
+        dao.replaceChartSeries(key, entities)
+      }
+      true
+    } catch (_: Exception) {
+      false
+    }
+  }
+
+  private data class SampleDateInfo(
+    val dateStr: String,
+    val label: String,
+    val timeMillis: Long,
+  )
+
+  private fun prepareSampleDates(range: ChartRange): List<SampleDateInfo> {
+    val count =
+      when (range) {
+        ChartRange.D7 -> 7
+        ChartRange.M1 -> 8
+        ChartRange.M3 -> 9
+        ChartRange.Y1 -> 10
+      }
+    val dateFmt = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+    val labelFmt = SimpleDateFormat("MMM d", Locale.US)
+    return sampleDates(range, count).map { date ->
+      SampleDateInfo(
+        dateStr = dateFmt.format(date),
+        label = labelFmt.format(date),
+        timeMillis = date.time,
+      )
+    }
+  }
+
+  private suspend fun fetchUsdSnapshotForDate(dateStr: String): Map<String, Double>? {
+    usdSnapshotCache[dateStr]?.let { return it }
+    val deferred =
+      inFlightDateFetches.getOrPut(dateStr) {
+        repoScope.async {
+          try {
+            val url =
+              "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@$dateStr/v1/currencies/usd.json"
+            val raw = api.getRawJson(url).string()
+            val usd = JSONObject(raw).optJSONObject("usd") ?: return@async null
+            val map = HashMap<String, Double>(200)
+            val keys = usd.keys()
+            while (keys.hasNext()) {
+              val k = keys.next()
+              val v = usd.optDouble(k, -1.0)
+              if (v > 0.0) map[k] = v
+            }
+            if (map.isNotEmpty()) {
+              usdSnapshotCache[dateStr] = map
+              map
+            } else null
+          } catch (_: Exception) {
+            null
+          } finally {
+            inFlightDateFetches.remove(dateStr)
+          }
+        }
+      }
+    return deferred.await()
+  }
 
   private suspend fun fetchDatedCurrencySnapshots(
     seriesKey: String,
@@ -276,33 +416,26 @@ class MarketRepository(
     to: String,
     range: ChartRange,
   ): List<CachedChartPointEntity> = coroutineScope {
-    val dates = sampleDates(range, count = 12)
-    val dateFmt = SimpleDateFormat("yyyy-MM-dd", Locale.US)
-    val labelFmt = SimpleDateFormat("MMM d", Locale.US)
+    val samples = prepareSampleDates(range)
     val fromKey = from.lowercase()
     val toKey = to.lowercase()
 
     val results =
-      dates.mapIndexed { idx, date ->
+      samples.mapIndexed { idx, info ->
         async {
-          val dateStr = dateFmt.format(date)
-          val url = "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@$dateStr/v1/currencies/usd.json"
-          runCatching {
-            val raw = api.getRawJson(url).string()
-            val usd = JSONObject(raw).optJSONObject("usd") ?: return@runCatching null
-            val rFrom = if (fromKey == "usd") 1.0 else usd.optDouble(fromKey, -1.0)
-            val rTo = if (toKey == "usd") 1.0 else usd.optDouble(toKey, -1.0)
-            if (rFrom > 0.0 && rTo > 0.0) {
-              CachedChartPointEntity(
-                id = "${seriesKey}_$idx",
-                seriesKey = seriesKey,
-                pointIndex = idx,
-                timestampMillis = date.time,
-                value = rTo / rFrom,
-                label = labelFmt.format(date),
-              )
-            } else null
-          }.getOrNull()
+          val usd = fetchUsdSnapshotForDate(info.dateStr) ?: return@async null
+          val rFrom = if (fromKey == "usd") 1.0 else (usd[fromKey] ?: -1.0)
+          val rTo = if (toKey == "usd") 1.0 else (usd[toKey] ?: -1.0)
+          if (rFrom > 0.0 && rTo > 0.0) {
+            CachedChartPointEntity(
+              id = "${seriesKey}_$idx",
+              seriesKey = seriesKey,
+              pointIndex = idx,
+              timestampMillis = info.timeMillis,
+              value = rTo / rFrom,
+              label = info.label,
+            )
+          } else null
         }
       }.awaitAll()
 
@@ -315,34 +448,27 @@ class MarketRepository(
     currencyCode: String,
     range: ChartRange,
   ): List<CachedChartPointEntity> = coroutineScope {
-    val dates = sampleDates(range, count = 12)
-    val dateFmt = SimpleDateFormat("yyyy-MM-dd", Locale.US)
-    val labelFmt = SimpleDateFormat("MMM d", Locale.US)
+    val samples = prepareSampleDates(range)
     val metalKey = metalCode.lowercase()
     val currKey = currencyCode.lowercase()
 
     val results =
-      dates.mapIndexed { idx, date ->
+      samples.mapIndexed { idx, info ->
         async {
-          val dateStr = dateFmt.format(date)
-          val url = "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@$dateStr/v1/currencies/usd.json"
-          runCatching {
-            val raw = api.getRawJson(url).string()
-            val usd = JSONObject(raw).optJSONObject("usd") ?: return@runCatching null
-            val metalPerUsd = usd.optDouble(metalKey, -1.0)
-            val currPerUsd = if (currKey == "usd") 1.0 else usd.optDouble(currKey, -1.0)
-            if (metalPerUsd > 0.0 && currPerUsd > 0.0) {
-              val pricePerOzInCurrency = (1.0 / metalPerUsd) * currPerUsd
-              CachedChartPointEntity(
-                id = "${seriesKey}_$idx",
-                seriesKey = seriesKey,
-                pointIndex = idx,
-                timestampMillis = date.time,
-                value = pricePerOzInCurrency,
-                label = labelFmt.format(date),
-              )
-            } else null
-          }.getOrNull()
+          val usd = fetchUsdSnapshotForDate(info.dateStr) ?: return@async null
+          val metalPerUsd = usd[metalKey] ?: -1.0
+          val currPerUsd = if (currKey == "usd") 1.0 else (usd[currKey] ?: -1.0)
+          if (metalPerUsd > 0.0 && currPerUsd > 0.0) {
+            val pricePerOzInCurrency = (1.0 / metalPerUsd) * currPerUsd
+            CachedChartPointEntity(
+              id = "${seriesKey}_$idx",
+              seriesKey = seriesKey,
+              pointIndex = idx,
+              timestampMillis = info.timeMillis,
+              value = pricePerOzInCurrency,
+              label = info.label,
+            )
+          } else null
         }
       }.awaitAll()
 

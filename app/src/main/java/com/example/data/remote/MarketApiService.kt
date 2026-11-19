@@ -73,8 +73,9 @@ interface MarketApiService {
 object NetworkModule {
   val okHttpClient: OkHttpClient by lazy {
     OkHttpClient.Builder()
-      .connectTimeout(12, TimeUnit.SECONDS)
-      .readTimeout(15, TimeUnit.SECONDS)
+      .connectTimeout(6, TimeUnit.SECONDS)
+      .readTimeout(8, TimeUnit.SECONDS)
+      .callTimeout(10, TimeUnit.SECONDS)
       .build()
   }
 

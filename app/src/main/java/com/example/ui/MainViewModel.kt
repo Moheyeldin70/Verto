@@ -19,6 +19,7 @@ import com.example.domain.CurrencyCatalog
 import com.example.domain.UnitCatalog
 import com.example.domain.UnitCategory
 import com.example.domain.UnitDef
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -100,6 +101,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
   val metalsState: StateFlow<MetalsTrackerState> = _metalsState
 
   private val _isSyncing = MutableStateFlow(false)
+  private var currencyChartJob: Job? = null
+  private var currencyPrefetchJob: Job? = null
+  private var metalChartJob: Job? = null
+  private var metalPrefetchJob: Job? = null
 
   val userPreferences =
     prefsRepo.preferences.stateIn(
@@ -289,11 +294,31 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
   fun loadCurrencyHistory() {
     val state = _currencyState.value
-    viewModelScope.launch {
-      _currencyState.update { it.copy(isChartLoading = true) }
-      val points = marketRepo.fetchCurrencyHistory(state.fromCode, state.toCode, state.chartRange)
-      _currencyState.update { it.copy(chartPoints = points, isChartLoading = false) }
-    }
+    val seriesKey = "FX_${state.fromCode}_${state.toCode}_${state.chartRange.name}"
+    currencyChartJob?.cancel()
+    currencyPrefetchJob?.cancel()
+
+    currencyChartJob =
+      viewModelScope.launch {
+        val cached = marketRepo.getCachedChartPoints(seriesKey)
+        if (cached.size >= 2) {
+          _currencyState.update { it.copy(chartPoints = cached, isChartLoading = false) }
+        } else {
+          _currencyState.update { it.copy(isChartLoading = true) }
+        }
+
+        val fresh = marketRepo.fetchCurrencyHistory(state.fromCode, state.toCode, state.chartRange)
+        if (fresh.size >= 2) {
+          _currencyState.update { it.copy(chartPoints = fresh, isChartLoading = false) }
+        } else {
+          _currencyState.update { it.copy(isChartLoading = false) }
+        }
+
+        currencyPrefetchJob =
+          viewModelScope.launch {
+            marketRepo.prefetchCurrencyRanges(state.fromCode, state.toCode, state.chartRange)
+          }
+      }
   }
 
   fun saveCurrentCurrencyConversion() {
@@ -346,16 +371,38 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
   fun loadMetalHistory() {
     val state = _metalsState.value
-    viewModelScope.launch {
-      _metalsState.update { it.copy(isChartLoading = true) }
-      val points =
-        marketRepo.fetchMetalHistory(
-          metalCode = state.selectedMetal.code,
-          currencyCode = state.selectedCountry.currencyCode,
-          range = state.chartRange,
-        )
-      _metalsState.update { it.copy(chartPoints = points, isChartLoading = false) }
-    }
+    val metalCode = state.selectedMetal.code
+    val currencyCode = state.selectedCountry.currencyCode
+    val seriesKey = "METAL_${metalCode}_${currencyCode}_${state.chartRange.name}"
+    metalChartJob?.cancel()
+    metalPrefetchJob?.cancel()
+
+    metalChartJob =
+      viewModelScope.launch {
+        val cached = marketRepo.getCachedChartPoints(seriesKey)
+        if (cached.size >= 2) {
+          _metalsState.update { it.copy(chartPoints = cached, isChartLoading = false) }
+        } else {
+          _metalsState.update { it.copy(isChartLoading = true) }
+        }
+
+        val fresh =
+          marketRepo.fetchMetalHistory(
+            metalCode = metalCode,
+            currencyCode = currencyCode,
+            range = state.chartRange,
+          )
+        if (fresh.size >= 2) {
+          _metalsState.update { it.copy(chartPoints = fresh, isChartLoading = false) }
+        } else {
+          _metalsState.update { it.copy(isChartLoading = false) }
+        }
+
+        metalPrefetchJob =
+          viewModelScope.launch {
+            marketRepo.prefetchMetalRanges(metalCode, currencyCode, state.chartRange)
+          }
+      }
   }
 
   fun updateBullionGrams(text: String) {

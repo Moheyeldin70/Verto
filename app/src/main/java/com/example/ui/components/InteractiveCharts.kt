@@ -23,6 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ShowChart
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -126,7 +127,16 @@ fun FinancialTrendChart(
         }
       }
 
-      Spacer(Modifier.height(12.dp))
+      if (isLoading) {
+        LinearProgressIndicator(
+          color = accentColor,
+          trackColor = accentColor.copy(alpha = 0.15f),
+          modifier = Modifier.fillMaxWidth().padding(top = 8.dp).height(2.dp).clip(RoundedCornerShape(1.dp)),
+        )
+        Spacer(Modifier.height(6.dp))
+      } else {
+        Spacer(Modifier.height(12.dp))
+      }
 
       Box(
         modifier =
