@@ -19,7 +19,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowDropDown
-import androidx.compose.material.icons.rounded.Autorenew
 import androidx.compose.material.icons.rounded.Public
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -96,67 +95,34 @@ fun MetalsTrackerScreen(
     modifier = modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
     verticalArrangement = Arrangement.spacedBy(16.dp),
   ) {
-    // Country Selector + Live polling bar
-    Row(
-      modifier = Modifier.fillMaxWidth(),
-      horizontalArrangement = Arrangement.SpaceBetween,
-      verticalAlignment = Alignment.CenterVertically,
+    // Country Selector
+    Surface(
+      onClick = { showCountryPicker = true },
+      shape = RoundedCornerShape(14.dp),
+      color = MaterialTheme.colorScheme.surface,
+      border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+      modifier = Modifier.fillMaxWidth().height(48.dp).testTag("country_selector_pill"),
     ) {
-      Surface(
-        onClick = { showCountryPicker = true },
-        shape = RoundedCornerShape(14.dp),
-        color = MaterialTheme.colorScheme.surface,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-        modifier = Modifier.weight(1f).height(48.dp).testTag("country_selector_pill"),
+      Row(
+        modifier = Modifier.padding(horizontal = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
       ) {
-        Row(
-          modifier = Modifier.padding(horizontal = 14.dp),
-          verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-          Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
-            Text(text = state.selectedCountry.flag, style = MaterialTheme.typography.titleLarge)
-            Spacer(Modifier.width(10.dp))
-            Text(
-              text = "${state.selectedCountry.localizedName(displayLocale)} ($currencyCode)",
-              style = MaterialTheme.typography.titleSmall,
-              fontWeight = FontWeight.SemiBold,
-              maxLines = 1,
-              overflow = TextOverflow.Ellipsis,
-            )
-          }
-          Icon(
-            imageVector = Icons.Rounded.ArrowDropDown,
-            contentDescription = stringResource(R.string.select_country),
-          )
-        }
-      }
-
-      Spacer(Modifier.width(10.dp))
-
-      Surface(
-        shape = RoundedCornerShape(12.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant,
-        modifier = Modifier.height(48.dp),
-      ) {
-        Row(
-          modifier = Modifier.padding(horizontal = 12.dp),
-          verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.spacedBy(6.dp),
-        ) {
-          Icon(
-            imageVector = Icons.Rounded.Autorenew,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(16.dp),
-          )
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+          Text(text = state.selectedCountry.flag, style = MaterialTheme.typography.titleLarge)
+          Spacer(Modifier.width(10.dp))
           Text(
-            text = "30s",
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface,
+            text = "${state.selectedCountry.localizedName(displayLocale)} ($currencyCode)",
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.SemiBold,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
           )
         }
+        Icon(
+          imageVector = Icons.Rounded.ArrowDropDown,
+          contentDescription = stringResource(R.string.select_country),
+        )
       }
     }
 
