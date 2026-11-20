@@ -21,9 +21,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.MyLocation
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.SwapVert
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -53,7 +57,9 @@ import com.example.data.local.AppLanguage
 import com.example.data.local.ThemeMode
 import com.example.data.repository.ChartRange
 import com.example.domain.CountryMarket
+import com.example.domain.CountryMetalsCatalog
 import com.example.domain.CurrencyInfo
+import com.example.domain.MeasurementLocalePreference
 import com.example.domain.UnitDef
 import com.example.ui.theme.LocalFinancialColors
 import java.util.Locale
@@ -507,6 +513,12 @@ fun CountryPickerBottomSheet(
 fun LanguageAndThemeSheet(
   selectedLanguage: AppLanguage,
   selectedTheme: ThemeMode,
+  selectedMeasurementLocale: MeasurementLocalePreference,
+  detectedCountryIso: String,
+  isDetectingLocation: Boolean,
+  displayLocale: Locale,
+  onDetectLocation: () -> Unit,
+  onSelectMeasurementLocale: (MeasurementLocalePreference) -> Unit,
   onSelectLanguage: (AppLanguage) -> Unit,
   onSelectTheme: (ThemeMode) -> Unit,
   onDismiss: () -> Unit,
@@ -516,6 +528,97 @@ fun LanguageAndThemeSheet(
     sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
   ) {
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp)) {
+      Text(
+        text = stringResource(R.string.location_region_section),
+        style = MaterialTheme.typography.titleMedium,
+        color = MaterialTheme.colorScheme.primary,
+      )
+      Spacer(Modifier.height(8.dp))
+
+      val activeRegion =
+        remember(detectedCountryIso) {
+          if (detectedCountryIso.isNotBlank()) CountryMetalsCatalog.find(detectedCountryIso) else null
+        }
+
+      FilledTonalButton(
+        onClick = onDetectLocation,
+        enabled = !isDetectingLocation,
+        colors =
+          ButtonDefaults.filledTonalButtonColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.primary,
+          ),
+        modifier = Modifier.fillMaxWidth().height(48.dp).testTag("detect_location_button"),
+      ) {
+        if (isDetectingLocation) {
+          CircularProgressIndicator(
+            modifier = Modifier.size(18.dp),
+            strokeWidth = 2.dp,
+            color = MaterialTheme.colorScheme.primary,
+          )
+          Spacer(Modifier.width(8.dp))
+          Text(text = stringResource(R.string.detecting_location))
+        } else {
+          Icon(
+            imageVector = Icons.Rounded.MyLocation,
+            contentDescription = null,
+            modifier = Modifier.size(18.dp),
+          )
+          Spacer(Modifier.width(8.dp))
+          val suffix =
+            if (activeRegion != null) " (${activeRegion.flag} ${activeRegion.localizedName(displayLocale)})"
+            else ""
+          Text(
+            text = stringResource(R.string.detect_location_button) + suffix,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+          )
+        }
+      }
+
+      Spacer(Modifier.height(10.dp))
+      Text(
+        text = stringResource(R.string.unit_system_label),
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+      )
+      Spacer(Modifier.height(6.dp))
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+      ) {
+        listOf(
+          MeasurementLocalePreference.AUTO to R.string.unit_system_auto,
+          MeasurementLocalePreference.METRIC to R.string.unit_system_metric,
+          MeasurementLocalePreference.IMPERIAL_US to R.string.unit_system_imperial_us,
+          MeasurementLocalePreference.UK to R.string.unit_system_uk,
+        ).forEach { (pref, labelRes) ->
+          val active = pref == selectedMeasurementLocale
+          Surface(
+            onClick = { onSelectMeasurementLocale(pref) },
+            shape = RoundedCornerShape(10.dp),
+            color =
+              if (active) MaterialTheme.colorScheme.primary
+              else MaterialTheme.colorScheme.surfaceVariant,
+            modifier = Modifier.weight(1f).height(48.dp).testTag("unit_sys_${pref.key.lowercase()}"),
+          ) {
+            Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(horizontal = 4.dp)) {
+              Text(
+                text = stringResource(labelRes),
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.SemiBold,
+                color =
+                  if (active) MaterialTheme.colorScheme.onPrimary
+                  else MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+              )
+            }
+          }
+        }
+      }
+
+      Spacer(Modifier.height(18.dp))
       Text(
         text = stringResource(R.string.choose_theme),
         style = MaterialTheme.typography.titleMedium,

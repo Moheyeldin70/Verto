@@ -106,4 +106,16 @@
     <string name="live_polling_note">每 30 秒自动刷新</string>
     <string name="copied_feedback">已复制到剪贴板</string>
     <string name="no_results">未找到匹配结果</string>
+
+    <!-- Location & Regional Defaults -->
+    <string name="location_region_section">位置与地区默认设置</string>
+    <string name="detect_location_button">使用当前位置</string>
+    <string name="detecting_location">正在定位…</string>
+    <string name="location_detected_feedback">已应用 %1$s 默认设置</string>
+    <string name="location_denied_feedback">位置权限被拒绝 — 使用手动或设备默认设置</string>
+    <string name="unit_system_label">默认单位制</string>
+    <string name="unit_system_auto">自动（按位置）</string>
+    <string name="unit_system_metric">公制</string>
+    <string name="unit_system_imperial_us">英制（美国）</string>
+    <string name="unit_system_uk">英制（英国）</string>
 </resources>

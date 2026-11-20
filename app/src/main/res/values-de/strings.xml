@@ -92,4 +92,15 @@
     <string name="live_polling_note">Auto-Aktualisierung alle 30s</string>
     <string name="copied_feedback">In Zwischenablage kopiert</string>
     <string name="no_results">Keine Treffer</string>
+
+    <string name="location_region_section">Standort &amp; Region</string>
+    <string name="detect_location_button">Aktuellen Standort nutzen</string>
+    <string name="detecting_location">Standort wird ermittelt…</string>
+    <string name="location_detected_feedback">Standardwerte für %1$s gesetzt</string>
+    <string name="location_denied_feedback">Standort abgelehnt — manuelle/Gerätewerte aktiv</string>
+    <string name="unit_system_label">Standard-Einheitensystem</string>
+    <string name="unit_system_auto">Auto (Standort)</string>
+    <string name="unit_system_metric">Metrisch</string>
+    <string name="unit_system_imperial_us">Imperial (US)</string>
+    <string name="unit_system_uk">UK</string>
 </resources>

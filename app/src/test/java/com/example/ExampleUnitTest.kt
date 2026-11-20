@@ -1,8 +1,13 @@
 package com.example
 
+import com.example.data.local.AppLanguage
+import com.example.data.local.UserPreferences
 import com.example.domain.CountryMetalsCatalog
 import com.example.domain.CurrencyCatalog
 import com.example.domain.FormattingUtils
+import com.example.domain.LocationLocaleResolver
+import com.example.domain.MeasurementLocalePreference
+import com.example.domain.MeasurementSystem
 import com.example.domain.UnitCatalog
 import com.example.domain.UnitCategory
 import org.junit.Assert.assertEquals
@@ -45,5 +50,46 @@ class ExampleUnitTest {
   fun formattingUtils_formatsCleanly() {
     assertEquals("1,234.5", FormattingUtils.formatSmart(1234.5))
     assertEquals("100.00 USD", FormattingUtils.formatMoney(100.0, "USD"))
+  }
+
+  @Test
+  fun locationLocaleResolver_mapsRegionsAndManualOverrides() {
+    // Measurement system mapping by country
+    assertEquals(MeasurementSystem.IMPERIAL_US, LocationLocaleResolver.measurementSystemForCountry("US"))
+    assertEquals(MeasurementSystem.UK, LocationLocaleResolver.measurementSystemForCountry("GB"))
+    assertEquals(MeasurementSystem.METRIC, LocationLocaleResolver.measurementSystemForCountry("EG"))
+    assertEquals(MeasurementSystem.METRIC, LocationLocaleResolver.measurementSystemForCountry("DE"))
+
+    // Manual override supersedes detected country
+    assertEquals(
+      MeasurementSystem.METRIC,
+      LocationLocaleResolver.resolveMeasurementSystem(MeasurementLocalePreference.METRIC, "US"),
+    )
+    assertEquals(
+      MeasurementSystem.IMPERIAL_US,
+      LocationLocaleResolver.resolveMeasurementSystem(MeasurementLocalePreference.IMPERIAL_US, "EG"),
+    )
+
+    // Default unit pairs per system
+    val usTemp = LocationLocaleResolver.defaultUnitPair(UnitCategory.TEMPERATURE, MeasurementSystem.IMPERIAL_US)
+    assertEquals("f", usTemp.first.id)
+    assertEquals("c", usTemp.second.id)
+
+    val egLength = LocationLocaleResolver.defaultUnitPair(UnitCategory.LENGTH, MeasurementSystem.METRIC)
+    assertEquals("km", egLength.first.id)
+    assertEquals("mi", egLength.second.id)
+
+    val ukVolume = LocationLocaleResolver.defaultUnitPair(UnitCategory.VOLUME, MeasurementSystem.UK)
+    assertEquals("gal_uk", ukVolume.first.id)
+    assertEquals("l", ukVolume.second.id)
+
+    // Default currency pair and country market per detected country
+    assertEquals("EUR" to "USD", LocationLocaleResolver.defaultCurrencyPairForCountry("US"))
+    assertEquals("USD" to "EGP", LocationLocaleResolver.defaultCurrencyPairForCountry("EG"))
+    assertEquals("USD" to "GBP", LocationLocaleResolver.defaultCurrencyPairForCountry("GB"))
+    assertEquals("EGP", LocationLocaleResolver.defaultCountryMarket("EG").currencyCode)
+
+    // Default language remains the device system language
+    assertEquals(AppLanguage.SYSTEM, UserPreferences().language)
   }
 }

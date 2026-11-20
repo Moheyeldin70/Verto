@@ -92,4 +92,15 @@
     <string name="live_polling_note">Her 30 saniyede bir otomatik yenilenir</string>
     <string name="copied_feedback">Panoya kopyalandı</string>
     <string name="no_results">Eşleşen sonuç yok</string>
+
+    <string name="location_region_section">Konum ve Bölgesel Varsayılanlar</string>
+    <string name="detect_location_button">Mevcut Konumu Kullan</string>
+    <string name="detecting_location">Konum algılanıyor…</string>
+    <string name="location_detected_feedback">%1$s için varsayılanlar ayarlandı</string>
+    <string name="location_denied_feedback">Konum izni reddedildi — manuel/cihaz ayarları kullanılıyor</string>
+    <string name="unit_system_label">Varsayılan Birim Sistemi</string>
+    <string name="unit_system_auto">Otomatik (Konum)</string>
+    <string name="unit_system_metric">Metrik</string>
+    <string name="unit_system_imperial_us">İngiliz (ABD)</string>
+    <string name="unit_system_uk">Birleşik Krallık</string>
 </resources>

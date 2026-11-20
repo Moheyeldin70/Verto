@@ -92,4 +92,15 @@
     <string name="live_polling_note">30초마다 자동 새로고침</string>
     <string name="copied_feedback">클립보드에 복사됨</string>
     <string name="no_results">검색 결과 없음</string>
+
+    <string name="location_region_section">위치 및 지역 기본값</string>
+    <string name="detect_location_button">현재 위치 사용</string>
+    <string name="detecting_location">위치 확인 중…</string>
+    <string name="location_detected_feedback">%1$s 기본값이 적용되었습니다</string>
+    <string name="location_denied_feedback">위치 권한 거부됨 — 수동/기기 기본값 사용</string>
+    <string name="unit_system_label">기본 단위 체계</string>
+    <string name="unit_system_auto">자동 (위치)</string>
+    <string name="unit_system_metric">미터법</string>
+    <string name="unit_system_imperial_us">야드파운드법 (미국)</string>
+    <string name="unit_system_uk">영국식</string>
 </resources>

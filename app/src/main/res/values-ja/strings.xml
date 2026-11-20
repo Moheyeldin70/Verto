@@ -106,4 +106,16 @@
     <string name="live_polling_note">30秒ごとに自動更新</string>
     <string name="copied_feedback">クリップボードにコピーしました</string>
     <string name="no_results">一致する結果がありません</string>
+
+    <!-- Location & Regional Defaults -->
+    <string name="location_region_section">位置情報・地域設定</string>
+    <string name="detect_location_button">現在地を使用</string>
+    <string name="detecting_location">位置情報を取得中…</string>
+    <string name="location_detected_feedback">%1$s のデフォルトを適用しました</string>
+    <string name="location_denied_feedback">位置情報の許可がありません — 手動/端末設定を使用</string>
+    <string name="unit_system_label">デフォルト単位系</string>
+    <string name="unit_system_auto">自動 (位置情報)</string>
+    <string name="unit_system_metric">メートル法</string>
+    <string name="unit_system_imperial_us">ヤード・ポンド法 (米国)</string>
+    <string name="unit_system_uk">英国式</string>
 </resources>

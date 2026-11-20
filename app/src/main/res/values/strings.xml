@@ -106,4 +106,16 @@
     <string name="live_polling_note">Auto-refreshing every 30s</string>
     <string name="copied_feedback">Copied to clipboard</string>
     <string name="no_results">No matching results</string>
+
+    <!-- Location & Regional Defaults -->
+    <string name="location_region_section">Location &amp; Regional Defaults</string>
+    <string name="detect_location_button">Use Current Location</string>
+    <string name="detecting_location">Detecting location…</string>
+    <string name="location_detected_feedback">Defaults set for %1$s</string>
+    <string name="location_denied_feedback">Location permission denied — using manual/device defaults</string>
+    <string name="unit_system_label">Default Unit System</string>
+    <string name="unit_system_auto">Auto (Location)</string>
+    <string name="unit_system_metric">Metric</string>
+    <string name="unit_system_imperial_us">Imperial (US)</string>
+    <string name="unit_system_uk">UK</string>
 </resources>

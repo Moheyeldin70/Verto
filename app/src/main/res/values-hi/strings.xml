@@ -92,4 +92,15 @@
     <string name="live_polling_note">हर 30 सेकंड में ऑटो-रिफ्रेश</string>
     <string name="copied_feedback">क्लिपबोर्ड पर कॉपी किया गया</string>
     <string name="no_results">कोई परिणाम नहीं</string>
+
+    <string name="location_region_section">स्थान और क्षेत्रीय डिफ़ॉल्ट</string>
+    <string name="detect_location_button">वर्तमान स्थान उपयोग करें</string>
+    <string name="detecting_location">स्थान खोजा जा रहा है…</string>
+    <string name="location_detected_feedback">%1$s के लिए डिफ़ॉल्ट सेट किया गया</string>
+    <string name="location_denied_feedback">स्थान अनुमति अस्वीकृत — मैन्युअल/डिवाइस डिफ़ॉल्ट सक्रिय</string>
+    <string name="unit_system_label">डिफ़ॉल्ट इकाई प्रणाली</string>
+    <string name="unit_system_auto">स्वतः (स्थान)</string>
+    <string name="unit_system_metric">मीट्रिक</string>
+    <string name="unit_system_imperial_us">इम्पीरियल (US)</string>
+    <string name="unit_system_uk">UK</string>
 </resources>

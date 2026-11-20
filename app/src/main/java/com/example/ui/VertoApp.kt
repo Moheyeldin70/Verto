@@ -1,7 +1,10 @@
 package com.example.ui
 
+import android.Manifest
 import android.content.res.Configuration
 import android.view.View
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -47,6 +50,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -69,6 +73,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.R
 import com.example.data.local.AppLanguage
 import com.example.data.local.ThemeMode
+import com.example.domain.CountryMetalsCatalog
 import com.example.ui.components.LanguageAndThemeSheet
 import com.example.ui.components.StatusPill
 import com.example.ui.screens.CurrencyConverterScreen
@@ -146,15 +151,50 @@ private fun VertoMainContent(
   val savedConversions by viewModel.savedConversions.collectAsStateWithLifecycle()
   val syncStatus by viewModel.syncStatus.collectAsStateWithLifecycle()
   val prefs by viewModel.userPreferences.collectAsStateWithLifecycle()
+  val prefsLoaded by viewModel.prefsLoaded.collectAsStateWithLifecycle()
+  val isDetectingLocation by viewModel.isDetectingLocation.collectAsStateWithLifecycle()
 
   var showSettingsSheet by remember { mutableStateOf(false) }
+  var explicitLocationRequest by remember { mutableStateOf(false) }
   val snackbarHostState = remember { SnackbarHostState() }
   val scope = rememberCoroutineScope()
+  val context = LocalContext.current
 
   val showSnackbar: (String) -> Unit = { msg ->
     scope.launch {
       snackbarHostState.currentSnackbarData?.dismiss()
       snackbarHostState.showSnackbar(msg)
+    }
+  }
+
+  val locationDeniedText = stringResource(R.string.location_denied_feedback)
+  val locationPermissionLauncher =
+    rememberLauncherForActivityResult(
+      contract = ActivityResultContracts.RequestPermission(),
+    ) { granted ->
+      val wasExplicit = explicitLocationRequest
+      explicitLocationRequest = false
+      viewModel.onLocationPermissionResult(granted = granted, forceApplyAll = wasExplicit)
+      if (!granted && wasExplicit) {
+        showSnackbar(locationDeniedText)
+      }
+    }
+
+  LaunchedEffect(prefsLoaded) {
+    if (!prefsLoaded) return@LaunchedEffect
+    if (viewModel.hasCoarseLocationPermission()) {
+      viewModel.detectAndApplyLocation(forceApplyAll = false)
+    } else if (!prefs.hasPromptedLocation) {
+      explicitLocationRequest = false
+      viewModel.markLocationPrompted()
+      locationPermissionLauncher.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
+    }
+  }
+
+  LaunchedEffect(displayLocale) {
+    viewModel.detectedRegionEvent.collect { iso ->
+      val name = CountryMetalsCatalog.find(iso).localizedName(displayLocale)
+      showSnackbar(context.getString(R.string.location_detected_feedback, name))
     }
   }
 
@@ -384,6 +424,19 @@ private fun VertoMainContent(
     LanguageAndThemeSheet(
       selectedLanguage = prefs.language,
       selectedTheme = prefs.themeMode,
+      selectedMeasurementLocale = prefs.measurementLocale,
+      detectedCountryIso = prefs.detectedCountryIso,
+      isDetectingLocation = isDetectingLocation,
+      displayLocale = displayLocale,
+      onDetectLocation = {
+        if (viewModel.hasCoarseLocationPermission()) {
+          viewModel.detectAndApplyLocation(forceApplyAll = true)
+        } else {
+          explicitLocationRequest = true
+          locationPermissionLauncher.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
+        }
+      },
+      onSelectMeasurementLocale = viewModel::setMeasurementLocale,
       onSelectLanguage = viewModel::setLanguage,
       onSelectTheme = viewModel::setThemeMode,
       onDismiss = { showSettingsSheet = false },

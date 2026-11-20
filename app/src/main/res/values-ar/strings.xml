@@ -106,4 +106,16 @@
     <string name="live_polling_note">تحديث تلقائي كل ٣٠ ثانية</string>
     <string name="copied_feedback">تم النسخ إلى الحافظة</string>
     <string name="no_results">لا توجد نتائج مطابقة</string>
+
+    <!-- Location & Regional Defaults -->
+    <string name="location_region_section">الموقع والإعدادات الإقليمية</string>
+    <string name="detect_location_button">استخدام الموقع الحالي</string>
+    <string name="detecting_location">جاري تحديد الموقع…</string>
+    <string name="location_detected_feedback">تم ضبط الإعدادات لدولة %1$s</string>
+    <string name="location_denied_feedback">تم رفض إذن الموقع — استخدام الإعدادات اليدوية</string>
+    <string name="unit_system_label">نظام الوحدات الافتراضي</string>
+    <string name="unit_system_auto">تلقائي (الموقع)</string>
+    <string name="unit_system_metric">متري</string>
+    <string name="unit_system_imperial_us">إمبراطوري (أمريكي)</string>
+    <string name="unit_system_uk">بريطاني</string>
 </resources>

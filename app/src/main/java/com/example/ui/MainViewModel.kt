@@ -8,7 +8,9 @@ import com.example.data.local.AppLanguage
 import com.example.data.local.CachedChartPointEntity
 import com.example.data.local.SavedConversionEntity
 import com.example.data.local.ThemeMode
+import com.example.data.local.UserPreferences
 import com.example.data.local.UserPreferencesRepository
+import com.example.data.location.CountryLocator
 import com.example.data.remote.NetworkModule
 import com.example.data.repository.ChartRange
 import com.example.data.repository.MarketRepository
@@ -16,12 +18,17 @@ import com.example.data.repository.SyncStatus
 import com.example.domain.CountryMarket
 import com.example.domain.CountryMetalsCatalog
 import com.example.domain.CurrencyCatalog
+import com.example.domain.LocationLocaleResolver
+import com.example.domain.MeasurementLocalePreference
+import com.example.domain.MeasurementSystem
 import com.example.domain.UnitCatalog
 import com.example.domain.UnitCategory
 import com.example.domain.UnitDef
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -29,6 +36,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import java.util.Locale
 
 enum class AppTab {
   UNITS,
@@ -87,6 +95,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
   private val db = AppDatabase.getInstance(application)
   private val prefsRepo = UserPreferencesRepository(application)
   private val marketRepo = MarketRepository(application, db.converterDao(), NetworkModule.apiService)
+  private val countryLocator = CountryLocator(application)
 
   private val _activeTab = MutableStateFlow(AppTab.UNITS)
   val activeTab: StateFlow<AppTab> = _activeTab
@@ -101,6 +110,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
   val metalsState: StateFlow<MetalsTrackerState> = _metalsState
 
   private val _isSyncing = MutableStateFlow(false)
+  private val _isDetectingLocation = MutableStateFlow(false)
+  val isDetectingLocation: StateFlow<Boolean> = _isDetectingLocation
+
+  private val _prefsLoaded = MutableStateFlow(false)
+  val prefsLoaded: StateFlow<Boolean> = _prefsLoaded
+
+  private val _detectedRegionEvent = MutableSharedFlow<String>(extraBufferCapacity = 1)
+  val detectedRegionEvent: SharedFlow<String> = _detectedRegionEvent
+
+  private var hasRestoredInitialUnits = false
   private var currencyChartJob: Job? = null
   private var currencyPrefetchJob: Job? = null
   private var metalChartJob: Job? = null
@@ -109,8 +128,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
   val userPreferences =
     prefsRepo.preferences.stateIn(
       viewModelScope,
-      SharingStarted.WhileSubscribed(5000),
-      com.example.data.local.UserPreferences(),
+      SharingStarted.Eagerly,
+      UserPreferences(),
     )
 
   val currencyRatesMap: StateFlow<Map<String, Double>> =
@@ -157,19 +176,48 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
       refreshAllRates()
     }
 
-    // Observe saved user preferences for currency & country
+    // Observe saved user preferences for currency, country, and unit locale
     viewModelScope.launch {
       prefsRepo.preferences.collect { prefs ->
+        _prefsLoaded.value = true
+
+        var currencyChanged = false
         _currencyState.update { cur ->
           if (cur.fromCode != prefs.fromCurrency || cur.toCode != prefs.toCurrency) {
+            currencyChanged = true
             cur.copy(fromCode = prefs.fromCurrency, toCode = prefs.toCurrency)
           } else cur
         }
+        if (currencyChanged) loadCurrencyHistory()
+
         val country = CountryMetalsCatalog.find(prefs.selectedCountryIso)
+        var countryChanged = false
         _metalsState.update { m ->
           if (m.selectedCountry.isoCode != country.isoCode) {
+            countryChanged = true
             m.copy(selectedCountry = country)
           } else m
+        }
+        if (countryChanged) loadMetalHistory()
+
+        if (!hasRestoredInitialUnits) {
+          hasRestoredInitialUnits = true
+          if (prefs.hasManualUnits && prefs.unitCategoryName.isNotBlank()) {
+            val cat = runCatching { UnitCategory.valueOf(prefs.unitCategoryName) }.getOrNull()
+            if (cat != null) {
+              val units = UnitCatalog.unitsFor(cat)
+              val from = units.find { it.id == prefs.fromUnitId }
+              val to = units.find { it.id == prefs.toUnitId }
+              if (from != null && to != null) {
+                _unitState.update { it.copy(category = cat, fromUnit = from, toUnit = to) }
+              }
+            }
+          } else {
+            val sys = resolveActiveMeasurementSystem(prefs)
+            val currentCat = _unitState.value.category
+            val pair = LocationLocaleResolver.defaultUnitPair(currentCat, sys)
+            _unitState.update { it.copy(fromUnit = pair.first, toUnit = pair.second) }
+          }
         }
       }
     }
@@ -203,6 +251,73 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     loadMetalHistory()
   }
 
+  private fun resolveActiveMeasurementSystem(prefs: UserPreferences = userPreferences.value): MeasurementSystem {
+    val countryIso =
+      prefs.detectedCountryIso.ifBlank {
+        Locale.getDefault().country.ifBlank { "US" }
+      }
+    return LocationLocaleResolver.resolveMeasurementSystem(prefs.measurementLocale, countryIso)
+  }
+
+  fun hasCoarseLocationPermission(): Boolean = countryLocator.hasCoarseLocationPermission()
+
+  fun markLocationPrompted() {
+    viewModelScope.launch { prefsRepo.markLocationPrompted() }
+  }
+
+  fun onLocationPermissionResult(granted: Boolean, forceApplyAll: Boolean) {
+    viewModelScope.launch {
+      prefsRepo.markLocationPrompted()
+      if (granted) {
+        detectAndApplyLocation(forceApplyAll = forceApplyAll)
+      }
+    }
+  }
+
+  fun detectAndApplyLocation(forceApplyAll: Boolean) {
+    if (_isDetectingLocation.value) return
+    viewModelScope.launch {
+      _isDetectingLocation.value = true
+      try {
+        val region = countryLocator.detectCountry()
+        val (defFromCurr, defToCurr) = LocationLocaleResolver.defaultCurrencyPairForCountry(region.countryIso)
+        val prefs = userPreferences.value
+
+        prefsRepo.saveDetectedRegion(
+          countryIso = region.countryIso,
+          resetManualOverrides = forceApplyAll,
+          defaultFromCurrency = defFromCurr,
+          defaultToCurrency = defToCurr,
+        )
+
+        if (forceApplyAll || !prefs.hasManualUnits) {
+          val system = LocationLocaleResolver.measurementSystemForCountry(region.countryIso)
+          val cat = _unitState.value.category
+          val pair = LocationLocaleResolver.defaultUnitPair(cat, system)
+          _unitState.update { it.copy(fromUnit = pair.first, toUnit = pair.second) }
+        }
+
+        if (forceApplyAll) {
+          _detectedRegionEvent.tryEmit(region.countryIso)
+        }
+      } finally {
+        _isDetectingLocation.value = false
+      }
+    }
+  }
+
+  fun setMeasurementLocale(preference: MeasurementLocalePreference) {
+    viewModelScope.launch {
+      prefsRepo.setMeasurementLocale(preference)
+      val prefs = userPreferences.value
+      val countryIso = prefs.detectedCountryIso.ifBlank { Locale.getDefault().country.ifBlank { "US" } }
+      val system = LocationLocaleResolver.resolveMeasurementSystem(preference, countryIso)
+      val cat = _unitState.value.category
+      val pair = LocationLocaleResolver.defaultUnitPair(cat, system)
+      _unitState.update { it.copy(fromUnit = pair.first, toUnit = pair.second) }
+    }
+  }
+
   fun selectTab(tab: AppTab) {
     _activeTab.value = tab
   }
@@ -229,22 +344,37 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
   // ---- Unit Converter Actions ----
   fun selectUnitCategory(category: UnitCategory) {
-    val pair = UnitCatalog.defaultPair(category)
+    val system = resolveActiveMeasurementSystem()
+    val pair = LocationLocaleResolver.defaultUnitPair(category, system)
     _unitState.update {
       it.copy(category = category, fromUnit = pair.first, toUnit = pair.second)
     }
   }
 
   fun setFromUnit(unit: UnitDef) {
+    val current = _unitState.value
     _unitState.update { it.copy(fromUnit = unit) }
+    viewModelScope.launch {
+      prefsRepo.setUnitSelection(current.category.name, unit.id, current.toUnit.id, isManual = true)
+    }
   }
 
   fun setToUnit(unit: UnitDef) {
+    val current = _unitState.value
     _unitState.update { it.copy(toUnit = unit) }
+    viewModelScope.launch {
+      prefsRepo.setUnitSelection(current.category.name, current.fromUnit.id, unit.id, isManual = true)
+    }
   }
 
   fun swapUnits() {
-    _unitState.update { it.copy(fromUnit = it.toUnit, toUnit = it.fromUnit) }
+    val current = _unitState.value
+    val newFrom = current.toUnit
+    val newTo = current.fromUnit
+    _unitState.update { it.copy(fromUnit = newFrom, toUnit = newTo) }
+    viewModelScope.launch {
+      prefsRepo.setUnitSelection(current.category.name, newFrom.id, newTo.id, isManual = true)
+    }
   }
 
   fun updateUnitInput(text: String) {
