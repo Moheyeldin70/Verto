@@ -136,4 +136,6 @@
     <string name="graph_unit_gold_coin">Gold Coin (8g)</string>
     <string name="graph_unit_silver_coin">Silver Coin (8g)</string>
     <string name="suffix_coin">coin</string>
+    <string name="license_footer_title" translatable="false">MIT License</string>
+    <string name="license_author_notice" translatable="false">Moheyeldin Emad · Nov 21, 2026 · contact.meldin@gmail.com</string>
 </resources>

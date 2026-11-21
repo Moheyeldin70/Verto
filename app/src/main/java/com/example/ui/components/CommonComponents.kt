@@ -855,6 +855,29 @@ fun SettingsSheet(
         }
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
       }
+      Spacer(Modifier.height(16.dp))
+      Surface(
+        shape = RoundedCornerShape(12.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+        modifier = Modifier.fillMaxWidth().testTag("settings_license_footer"),
+      ) {
+        Column(
+          modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp),
+          verticalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
+          Text(
+            text = "${stringResource(R.string.app_name)} · ${stringResource(R.string.license_footer_title)}",
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurface,
+          )
+          Text(
+            text = stringResource(R.string.license_author_notice),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+          )
+        }
+      }
       Spacer(Modifier.height(28.dp))
     }
   }
