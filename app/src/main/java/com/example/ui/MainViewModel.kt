@@ -6,7 +6,9 @@ import androidx.lifecycle.viewModelScope
 import com.example.data.local.AppDatabase
 import com.example.data.local.AppLanguage
 import com.example.data.local.CachedChartPointEntity
+import com.example.data.local.NavBarPosition
 import com.example.data.local.SavedConversionEntity
+import com.example.data.local.StartScreenPreference
 import com.example.data.local.ThemeMode
 import com.example.data.local.UserPreferences
 import com.example.data.local.UserPreferencesRepository
@@ -44,9 +46,10 @@ enum class AppTab {
   METALS,
 }
 
-enum class UnitChartMode {
-  BARS,
-  CURVE,
+enum class MetalChartUnit {
+  OZ,
+  GRAM,
+  COIN,
 }
 
 enum class MetalType(val code: String) {
@@ -59,7 +62,6 @@ data class UnitConverterState(
   val fromUnit: UnitDef = UnitCatalog.defaultPair(UnitCategory.LENGTH).first,
   val toUnit: UnitDef = UnitCatalog.defaultPair(UnitCategory.LENGTH).second,
   val inputText: String = "10",
-  val chartMode: UnitChartMode = UnitChartMode.BARS,
 ) {
   val inputValue: Double
     get() = inputText.toDoubleOrNull() ?: 0.0
@@ -81,6 +83,8 @@ data class MetalsTrackerState(
   val selectedMetal: MetalType = MetalType.GOLD,
   val selectedCountry: CountryMarket = CountryMetalsCatalog.find("US"),
   val chartRange: ChartRange = ChartRange.M1,
+  val chartUnit: MetalChartUnit = MetalChartUnit.OZ,
+  val chartPurityFraction: Double = 1.0,
   val chartPoints: List<CachedChartPointEntity> = emptyList(),
   val isChartLoading: Boolean = false,
   val goldUsdPerOz: Double = 2635.0,
@@ -120,6 +124,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
   val detectedRegionEvent: SharedFlow<String> = _detectedRegionEvent
 
   private var hasRestoredInitialUnits = false
+  private var hasAppliedInitialStartTab = false
   private var currencyChartJob: Job? = null
   private var currencyPrefetchJob: Job? = null
   private var metalChartJob: Job? = null
@@ -180,6 +185,18 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     viewModelScope.launch {
       prefsRepo.preferences.collect { prefs ->
         _prefsLoaded.value = true
+
+        if (!hasAppliedInitialStartTab) {
+          hasAppliedInitialStartTab = true
+          _activeTab.value =
+            when (prefs.startScreen) {
+              StartScreenPreference.UNITS -> AppTab.UNITS
+              StartScreenPreference.CURRENCY -> AppTab.CURRENCY
+              StartScreenPreference.METALS -> AppTab.METALS
+              StartScreenPreference.LAST_OPENED ->
+                runCatching { AppTab.valueOf(prefs.lastActiveTab) }.getOrDefault(AppTab.UNITS)
+            }
+        }
 
         var currencyChanged = false
         _currencyState.update { cur ->
@@ -320,6 +337,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
   fun selectTab(tab: AppTab) {
     _activeTab.value = tab
+    viewModelScope.launch { prefsRepo.setLastActiveTab(tab.name) }
   }
 
   fun setThemeMode(mode: ThemeMode) {
@@ -328,6 +346,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
   fun setLanguage(language: AppLanguage) {
     viewModelScope.launch { prefsRepo.setLanguage(language) }
+  }
+
+  fun setNavBarPosition(position: NavBarPosition) {
+    viewModelScope.launch { prefsRepo.setNavBarPosition(position) }
+  }
+
+  fun setStartScreen(startScreen: StartScreenPreference) {
+    viewModelScope.launch { prefsRepo.setStartScreen(startScreen) }
   }
 
   fun refreshAllRates() {
@@ -381,10 +407,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     if (text.isEmpty() || text == "-" || text == "." || text == "-." || text.toDoubleOrNull() != null) {
       _unitState.update { it.copy(inputText = text) }
     }
-  }
-
-  fun setUnitChartMode(mode: UnitChartMode) {
-    _unitState.update { it.copy(chartMode = mode) }
   }
 
   // ---- Currency Converter Actions ----
@@ -483,7 +505,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
   // ---- Gold & Silver Tracker Actions ----
   fun selectMetal(metal: MetalType) {
     _metalsState.update {
-      it.copy(selectedMetal = metal, calculatorPurityFraction = 1.0)
+      it.copy(
+        selectedMetal = metal,
+        calculatorPurityFraction = 1.0,
+        chartPurityFraction = 1.0,
+      )
     }
     loadMetalHistory()
   }
@@ -497,6 +523,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
   fun setMetalChartRange(range: ChartRange) {
     _metalsState.update { it.copy(chartRange = range) }
     loadMetalHistory()
+  }
+
+  fun setMetalChartUnit(unit: MetalChartUnit) {
+    _metalsState.update { it.copy(chartUnit = unit) }
+  }
+
+  fun setMetalChartPurity(fraction: Double) {
+    _metalsState.update { it.copy(chartPurityFraction = fraction) }
   }
 
   fun loadMetalHistory() {

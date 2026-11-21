@@ -473,12 +473,12 @@ private fun CurrencyChartCard(
     border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
   ) {
     Column(modifier = Modifier.fillMaxWidth().padding(18.dp)) {
-      Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-      ) {
-        Column(modifier = Modifier.weight(1f)) {
+      Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.SpaceBetween,
+          verticalAlignment = Alignment.CenterVertically,
+        ) {
           Text(
             text = stringResource(R.string.historical_chart_title),
             style = MaterialTheme.typography.titleMedium,
@@ -490,7 +490,12 @@ private fun CurrencyChartCard(
             fontWeight = FontWeight.SemiBold,
           )
         }
-        ChartRangeSelector(selected = state.chartRange, onSelect = onSelectRange)
+        Spacer(Modifier.height(10.dp))
+        ChartRangeSelector(
+          selected = state.chartRange,
+          onSelect = onSelectRange,
+          modifier = Modifier.fillMaxWidth(),
+        )
       }
       Spacer(Modifier.height(14.dp))
       FinancialTrendChart(

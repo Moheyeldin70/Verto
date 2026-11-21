@@ -72,6 +72,7 @@
     <string name="range_1m">1个月</string>
     <string name="range_3m">3个月</string>
     <string name="range_1y">1年</string>
+    <string name="range_5y">5年</string>
     <string name="period_high">最高</string>
     <string name="period_low">最低</string>
     <string name="period_change">涨跌幅</string>
@@ -118,4 +119,20 @@
     <string name="unit_system_metric">公制</string>
     <string name="unit_system_imperial_us">英制（美国）</string>
     <string name="unit_system_uk">英制（英国）</string>
+
+    <string name="action_settings">设置</string>
+    <string name="nav_position_label">导航栏位置</string>
+    <string name="nav_pos_bottom">底部</string>
+    <string name="nav_pos_top">顶部</string>
+    <string name="nav_pos_left">左侧</string>
+    <string name="nav_pos_right">右侧</string>
+    <string name="start_screen_label">启动页面</string>
+    <string name="start_last_opened">继续上次浏览</string>
+    <string name="chart_unit_label">图表单位</string>
+    <string name="chart_purity_label">图表纯度</string>
+    <string name="graph_unit_oz">盎司</string>
+    <string name="graph_unit_gram">克</string>
+    <string name="graph_unit_gold_coin">金币 (8g)</string>
+    <string name="graph_unit_silver_coin">银币 (8g)</string>
+    <string name="suffix_coin">枚</string>
 </resources>

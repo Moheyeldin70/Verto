@@ -3,6 +3,7 @@ package com.example.ui.components
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,13 +17,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.MyLocation
 import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.SwapVert
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -54,6 +58,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.R
 import com.example.data.local.AppLanguage
+import com.example.data.local.NavBarPosition
+import com.example.data.local.StartScreenPreference
 import com.example.data.local.ThemeMode
 import com.example.data.repository.ChartRange
 import com.example.domain.CountryMarket
@@ -140,9 +146,10 @@ fun ChartRangeSelector(
       ChartRange.M1 to R.string.range_1m,
       ChartRange.M3 to R.string.range_3m,
       ChartRange.Y1 to R.string.range_1y,
+      ChartRange.Y5 to R.string.range_5y,
     )
   Row(
-    modifier = modifier,
+    modifier = modifier.horizontalScroll(rememberScrollState()),
     horizontalArrangement = Arrangement.spacedBy(6.dp),
   ) {
     items.forEach { (range, labelRes) ->
@@ -153,7 +160,7 @@ fun ChartRangeSelector(
         color =
           if (active) MaterialTheme.colorScheme.primary
           else MaterialTheme.colorScheme.surfaceVariant,
-        modifier = Modifier.height(34.dp).testTag("range_${range.name.lowercase()}"),
+        modifier = Modifier.height(36.dp).testTag("range_${range.name.lowercase()}"),
       ) {
         Box(
           contentAlignment = Alignment.Center,
@@ -510,15 +517,19 @@ fun CountryPickerBottomSheet(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LanguageAndThemeSheet(
+fun SettingsSheet(
   selectedLanguage: AppLanguage,
   selectedTheme: ThemeMode,
+  selectedNavBarPosition: NavBarPosition,
+  selectedStartScreen: StartScreenPreference,
   selectedMeasurementLocale: MeasurementLocalePreference,
   detectedCountryIso: String,
   isDetectingLocation: Boolean,
   displayLocale: Locale,
   onDetectLocation: () -> Unit,
   onSelectMeasurementLocale: (MeasurementLocalePreference) -> Unit,
+  onSelectNavBarPosition: (NavBarPosition) -> Unit,
+  onSelectStartScreen: (StartScreenPreference) -> Unit,
   onSelectLanguage: (AppLanguage) -> Unit,
   onSelectTheme: (ThemeMode) -> Unit,
   onDismiss: () -> Unit,
@@ -527,7 +538,44 @@ fun LanguageAndThemeSheet(
     onDismissRequest = onDismiss,
     sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
   ) {
-    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp)) {
+    Column(
+      modifier =
+        Modifier
+          .fillMaxWidth()
+          .verticalScroll(rememberScrollState())
+          .padding(horizontal = 20.dp),
+    ) {
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
+        Row(
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+          Icon(
+            imageVector = Icons.Rounded.Settings,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+          )
+          Text(
+            text = stringResource(R.string.action_settings),
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+          )
+        }
+        IconButton(onClick = onDismiss, modifier = Modifier.size(48.dp)) {
+          Icon(
+            imageVector = Icons.Rounded.Close,
+            contentDescription = stringResource(R.string.action_close),
+          )
+        }
+      }
+
+      Spacer(Modifier.height(12.dp))
+
+      // 1. Location & Regional Defaults
       Text(
         text = stringResource(R.string.location_region_section),
         style = MaterialTheme.typography.titleMedium,
@@ -618,7 +666,8 @@ fun LanguageAndThemeSheet(
         }
       }
 
-      Spacer(Modifier.height(18.dp))
+      // 2. Appearance / Dark Mode
+      Spacer(Modifier.height(20.dp))
       Text(
         text = stringResource(R.string.choose_theme),
         style = MaterialTheme.typography.titleMedium,
@@ -659,6 +708,104 @@ fun LanguageAndThemeSheet(
         }
       }
 
+      // 3. Navigation Bar Position
+      Spacer(Modifier.height(20.dp))
+      Text(
+        text = stringResource(R.string.nav_position_label),
+        style = MaterialTheme.typography.titleMedium,
+        color = MaterialTheme.colorScheme.primary,
+      )
+      Spacer(Modifier.height(8.dp))
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+      ) {
+        listOf(
+          NavBarPosition.BOTTOM to R.string.nav_pos_bottom,
+          NavBarPosition.TOP to R.string.nav_pos_top,
+          NavBarPosition.LEFT to R.string.nav_pos_left,
+          NavBarPosition.RIGHT to R.string.nav_pos_right,
+        ).forEach { (pos, labelRes) ->
+          val active = pos == selectedNavBarPosition
+          Surface(
+            onClick = { onSelectNavBarPosition(pos) },
+            shape = RoundedCornerShape(10.dp),
+            color =
+              if (active) MaterialTheme.colorScheme.primary
+              else MaterialTheme.colorScheme.surfaceVariant,
+            modifier = Modifier.weight(1f).height(48.dp).testTag("nav_pos_${pos.key.lowercase()}"),
+          ) {
+            Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(horizontal = 4.dp)) {
+              Text(
+                text = stringResource(labelRes),
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.SemiBold,
+                color =
+                  if (active) MaterialTheme.colorScheme.onPrimary
+                  else MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+              )
+            }
+          }
+        }
+      }
+
+      // 4. Start Screen
+      Spacer(Modifier.height(20.dp))
+      Text(
+        text = stringResource(R.string.start_screen_label),
+        style = MaterialTheme.typography.titleMedium,
+        color = MaterialTheme.colorScheme.primary,
+      )
+      Spacer(Modifier.height(8.dp))
+      Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        val startRows =
+          listOf(
+            listOf(
+              StartScreenPreference.UNITS to R.string.tab_units,
+              StartScreenPreference.CURRENCY to R.string.tab_currency,
+            ),
+            listOf(
+              StartScreenPreference.METALS to R.string.tab_metals,
+              StartScreenPreference.LAST_OPENED to R.string.start_last_opened,
+            ),
+          )
+        startRows.forEach { rowItems ->
+          Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+          ) {
+            rowItems.forEach { (pref, labelRes) ->
+              val active = pref == selectedStartScreen
+              Surface(
+                onClick = { onSelectStartScreen(pref) },
+                shape = RoundedCornerShape(12.dp),
+                color =
+                  if (active) MaterialTheme.colorScheme.primary
+                  else MaterialTheme.colorScheme.surfaceVariant,
+                modifier =
+                  Modifier.weight(1f).height(48.dp).testTag("start_screen_${pref.key.lowercase()}"),
+              ) {
+                Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(horizontal = 8.dp)) {
+                  Text(
+                    text = stringResource(labelRes),
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color =
+                      if (active) MaterialTheme.colorScheme.onPrimary
+                      else MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                  )
+                }
+              }
+            }
+          }
+        }
+      }
+
+      // 5. Language
       Spacer(Modifier.height(20.dp))
       Text(
         text = stringResource(R.string.choose_language),
@@ -667,48 +814,48 @@ fun LanguageAndThemeSheet(
       )
       Spacer(Modifier.height(8.dp))
 
-      LazyColumn(modifier = Modifier.fillMaxWidth().heightIn(max = 360.dp)) {
-        items(AppLanguage.entries) { lang ->
-          val isSelected = lang == selectedLanguage
-          Row(
-            modifier =
-              Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp))
-                .clickable {
-                  onSelectLanguage(lang)
-                  onDismiss()
-                }
-                .padding(horizontal = 10.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-          ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-              Text(text = lang.flag, style = MaterialTheme.typography.titleLarge)
-              Spacer(Modifier.width(12.dp))
-              Text(
-                text =
-                  if (lang == AppLanguage.SYSTEM) stringResource(R.string.language_system)
-                  else lang.nativeLabel,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                color =
-                  if (isSelected) MaterialTheme.colorScheme.primary
-                  else MaterialTheme.colorScheme.onSurface,
-              )
-            }
-            if (isSelected) {
-              Icon(
-                imageVector = Icons.Rounded.Check,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-              )
-            }
+      AppLanguage.entries.forEach { lang ->
+        val isSelected = lang == selectedLanguage
+        Row(
+          modifier =
+            Modifier
+              .fillMaxWidth()
+              .heightIn(min = 48.dp)
+              .clip(RoundedCornerShape(12.dp))
+              .clickable {
+                onSelectLanguage(lang)
+                onDismiss()
+              }
+              .padding(horizontal = 10.dp, vertical = 12.dp)
+              .testTag("lang_${lang.code}"),
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+          Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(text = lang.flag, style = MaterialTheme.typography.titleLarge)
+            Spacer(Modifier.width(12.dp))
+            Text(
+              text =
+                if (lang == AppLanguage.SYSTEM) stringResource(R.string.language_system)
+                else lang.nativeLabel,
+              style = MaterialTheme.typography.bodyLarge,
+              fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+              color =
+                if (isSelected) MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.onSurface,
+            )
           }
-          HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
+          if (isSelected) {
+            Icon(
+              imageVector = Icons.Rounded.Check,
+              contentDescription = null,
+              tint = MaterialTheme.colorScheme.primary,
+            )
+          }
         }
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
       }
-      Spacer(Modifier.height(24.dp))
+      Spacer(Modifier.height(28.dp))
     }
   }
 }

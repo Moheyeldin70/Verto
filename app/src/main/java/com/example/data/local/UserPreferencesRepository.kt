@@ -21,6 +21,28 @@ enum class ThemeMode(val key: String) {
   }
 }
 
+enum class NavBarPosition(val key: String) {
+  BOTTOM("BOTTOM"),
+  TOP("TOP"),
+  LEFT("LEFT"),
+  RIGHT("RIGHT");
+
+  companion object {
+    fun fromKey(key: String?): NavBarPosition = entries.find { it.key == key } ?: BOTTOM
+  }
+}
+
+enum class StartScreenPreference(val key: String) {
+  UNITS("UNITS"),
+  CURRENCY("CURRENCY"),
+  METALS("METALS"),
+  LAST_OPENED("LAST_OPENED");
+
+  companion object {
+    fun fromKey(key: String?): StartScreenPreference = entries.find { it.key == key } ?: UNITS
+  }
+}
+
 enum class AppLanguage(val code: String, val nativeLabel: String, val flag: String) {
   SYSTEM("system", "System", "🌐"),
   ENGLISH("en", "English", "🇺🇸"),
@@ -42,6 +64,9 @@ enum class AppLanguage(val code: String, val nativeLabel: String, val flag: Stri
 data class UserPreferences(
   val themeMode: ThemeMode = ThemeMode.SYSTEM,
   val language: AppLanguage = AppLanguage.SYSTEM,
+  val navBarPosition: NavBarPosition = NavBarPosition.BOTTOM,
+  val startScreen: StartScreenPreference = StartScreenPreference.UNITS,
+  val lastActiveTab: String = "UNITS",
   val fromCurrency: String = "USD",
   val toCurrency: String = "EUR",
   val selectedCountryIso: String = "US",
@@ -60,6 +85,9 @@ class UserPreferencesRepository(private val context: Context) {
   private object Keys {
     val THEME_MODE = stringPreferencesKey("theme_mode")
     val LANGUAGE = stringPreferencesKey("language_code")
+    val NAV_BAR_POSITION = stringPreferencesKey("nav_bar_position")
+    val START_SCREEN = stringPreferencesKey("start_screen")
+    val LAST_ACTIVE_TAB = stringPreferencesKey("last_active_tab")
     val FROM_CURRENCY = stringPreferencesKey("from_currency")
     val TO_CURRENCY = stringPreferencesKey("to_currency")
     val COUNTRY_ISO = stringPreferencesKey("country_iso")
@@ -79,6 +107,9 @@ class UserPreferencesRepository(private val context: Context) {
       UserPreferences(
         themeMode = ThemeMode.fromKey(prefs[Keys.THEME_MODE]),
         language = AppLanguage.fromCode(prefs[Keys.LANGUAGE]),
+        navBarPosition = NavBarPosition.fromKey(prefs[Keys.NAV_BAR_POSITION]),
+        startScreen = StartScreenPreference.fromKey(prefs[Keys.START_SCREEN]),
+        lastActiveTab = prefs[Keys.LAST_ACTIVE_TAB] ?: "UNITS",
         fromCurrency = prefs[Keys.FROM_CURRENCY] ?: "USD",
         toCurrency = prefs[Keys.TO_CURRENCY] ?: "EUR",
         selectedCountryIso = prefs[Keys.COUNTRY_ISO] ?: "US",
@@ -100,6 +131,18 @@ class UserPreferencesRepository(private val context: Context) {
 
   suspend fun setLanguage(language: AppLanguage) {
     context.dataStore.edit { it[Keys.LANGUAGE] = language.code }
+  }
+
+  suspend fun setNavBarPosition(position: NavBarPosition) {
+    context.dataStore.edit { it[Keys.NAV_BAR_POSITION] = position.key }
+  }
+
+  suspend fun setStartScreen(startScreen: StartScreenPreference) {
+    context.dataStore.edit { it[Keys.START_SCREEN] = startScreen.key }
+  }
+
+  suspend fun setLastActiveTab(tabName: String) {
+    context.dataStore.edit { it[Keys.LAST_ACTIVE_TAB] = tabName }
   }
 
   suspend fun setCurrencyPair(from: String, to: String, isManual: Boolean = true) {

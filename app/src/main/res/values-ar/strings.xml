@@ -72,6 +72,7 @@
     <string name="range_1m">شهر</string>
     <string name="range_3m">٣ أشهر</string>
     <string name="range_1y">سنة</string>
+    <string name="range_5y">٥ سنوات</string>
     <string name="period_high">الأعلى</string>
     <string name="period_low">الأدنى</string>
     <string name="period_change">التغير</string>
@@ -118,4 +119,21 @@
     <string name="unit_system_metric">متري</string>
     <string name="unit_system_imperial_us">إمبراطوري (أمريكي)</string>
     <string name="unit_system_uk">بريطاني</string>
+
+    <!-- Settings, Navigation Position, Start Screen & Metal Chart Units -->
+    <string name="action_settings">الإعدادات</string>
+    <string name="nav_position_label">موضع شريط التنقل</string>
+    <string name="nav_pos_bottom">الأسفل</string>
+    <string name="nav_pos_top">الأعلى</string>
+    <string name="nav_pos_left">اليسار</string>
+    <string name="nav_pos_right">اليمين</string>
+    <string name="start_screen_label">بدء التطبيق عند</string>
+    <string name="start_last_opened">متابعة من حيث توقفت</string>
+    <string name="chart_unit_label">وحدة الرسم البياني</string>
+    <string name="chart_purity_label">عيار الرسم البياني</string>
+    <string name="graph_unit_oz">أونصة</string>
+    <string name="graph_unit_gram">غرام</string>
+    <string name="graph_unit_gold_coin">جنيه ذهب (٨ جم)</string>
+    <string name="graph_unit_silver_coin">عملة فضة (٨ جم)</string>
+    <string name="suffix_coin">عملة</string>
 </resources>

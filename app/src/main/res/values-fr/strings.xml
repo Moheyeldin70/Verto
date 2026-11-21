@@ -60,6 +60,7 @@
     <string name="range_1m">1M</string>
     <string name="range_3m">3M</string>
     <string name="range_1y">1A</string>
+    <string name="range_5y">5A</string>
     <string name="period_high">Haut</string>
     <string name="period_low">Bas</string>
     <string name="period_change">Var.</string>
@@ -103,4 +104,20 @@
     <string name="unit_system_metric">Métrique</string>
     <string name="unit_system_imperial_us">Impérial (US)</string>
     <string name="unit_system_uk">Royaume-Uni</string>
+
+    <string name="action_settings">Paramètres</string>
+    <string name="nav_position_label">Position de navigation</string>
+    <string name="nav_pos_bottom">Bas</string>
+    <string name="nav_pos_top">Haut</string>
+    <string name="nav_pos_left">Gauche</string>
+    <string name="nav_pos_right">Droite</string>
+    <string name="start_screen_label">Écran de démarrage</string>
+    <string name="start_last_opened">Reprendre où laissé</string>
+    <string name="chart_unit_label">Unité du graphique</string>
+    <string name="chart_purity_label">Pureté du graphique</string>
+    <string name="graph_unit_oz">Once Troy</string>
+    <string name="graph_unit_gram">Gramme</string>
+    <string name="graph_unit_gold_coin">Pièce Or (8g)</string>
+    <string name="graph_unit_silver_coin">Pièce Argent (8g)</string>
+    <string name="suffix_coin">pièce</string>
 </resources>

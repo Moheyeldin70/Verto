@@ -1,7 +1,6 @@
 package com.example.ui.screens
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -56,11 +55,8 @@ import com.example.domain.FormattingUtils
 import com.example.domain.UnitCatalog
 import com.example.domain.UnitCategory
 import com.example.domain.UnitDef
-import com.example.ui.UnitChartMode
 import com.example.ui.UnitConverterState
 import com.example.ui.components.SwapButton
-import com.example.ui.components.UnitComparisonBarChart
-import com.example.ui.components.UnitFunctionCurveChart
 import com.example.ui.components.UnitPickerBottomSheet
 import com.example.ui.theme.NumericDisplayStyle
 import com.example.ui.theme.NumericMediumStyle
@@ -75,7 +71,6 @@ fun UnitConverterScreen(
   onSelectToUnit: (UnitDef) -> Unit,
   onSwap: () -> Unit,
   onInputChange: (String) -> Unit,
-  onChartModeChange: (UnitChartMode) -> Unit,
   onShowMessage: (String) -> Unit,
   modifier: Modifier = Modifier,
 ) {
@@ -140,11 +135,6 @@ fun UnitConverterScreen(
           )
         }
         Column(modifier = Modifier.weight(1.1f), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-          UnitGraphCard(
-            state = state,
-            unitsInCategory = unitsInCategory,
-            onChartModeChange = onChartModeChange,
-          )
           AllUnitsBreakdownCard(
             state = state,
             unitsInCategory = unitsInCategory,
@@ -167,11 +157,6 @@ fun UnitConverterScreen(
             clipboard.setText(AnnotatedString(FormattingUtils.formatSmart(state.outputValue)))
             onShowMessage(copiedMsg)
           },
-        )
-        UnitGraphCard(
-          state = state,
-          unitsInCategory = unitsInCategory,
-          onChartModeChange = onChartModeChange,
         )
         AllUnitsBreakdownCard(
           state = state,
@@ -355,83 +340,6 @@ private fun UnitSelectorPill(
         contentDescription = null,
         tint = MaterialTheme.colorScheme.onSurfaceVariant,
       )
-    }
-  }
-}
-
-@Composable
-private fun UnitGraphCard(
-  state: UnitConverterState,
-  unitsInCategory: List<UnitDef>,
-  onChartModeChange: (UnitChartMode) -> Unit,
-) {
-  Card(
-    shape = MaterialTheme.shapes.large,
-    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-  ) {
-    Column(modifier = Modifier.fillMaxWidth().padding(18.dp)) {
-      Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-      ) {
-        Text(
-          text = stringResource(R.string.unit_graph_title),
-          style = MaterialTheme.typography.titleMedium,
-          modifier = Modifier.weight(1f),
-        )
-        Spacer(Modifier.width(8.dp))
-        Row(
-          modifier =
-            Modifier
-              .clip(RoundedCornerShape(10.dp))
-              .background(MaterialTheme.colorScheme.surfaceVariant)
-              .padding(3.dp),
-          horizontalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
-          listOf(
-            UnitChartMode.BARS to R.string.chart_mode_bars,
-            UnitChartMode.CURVE to R.string.chart_mode_curve,
-          ).forEach { (mode, resId) ->
-            val active = state.chartMode == mode
-            Surface(
-              onClick = { onChartModeChange(mode) },
-              shape = RoundedCornerShape(8.dp),
-              color =
-                if (active) MaterialTheme.colorScheme.primary
-                else MaterialTheme.colorScheme.surfaceVariant,
-            ) {
-              Text(
-                text = stringResource(resId),
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.SemiBold,
-                color =
-                  if (active) MaterialTheme.colorScheme.onPrimary
-                  else MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-              )
-            }
-          }
-        }
-      }
-
-      Spacer(Modifier.height(14.dp))
-
-      if (state.chartMode == UnitChartMode.BARS) {
-        UnitComparisonBarChart(
-          units = unitsInCategory,
-          inputValue = state.inputValue,
-          fromUnit = state.fromUnit,
-          toUnit = state.toUnit,
-        )
-      } else {
-        UnitFunctionCurveChart(
-          inputValue = state.inputValue,
-          fromUnit = state.fromUnit,
-          toUnit = state.toUnit,
-        )
-      }
     }
   }
 }

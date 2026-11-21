@@ -60,6 +60,7 @@
     <string name="range_1m">1M</string>
     <string name="range_3m">3M</string>
     <string name="range_1y">1A</string>
+    <string name="range_5y">5A</string>
     <string name="period_high">Máx</string>
     <string name="period_low">Mín</string>
     <string name="period_change">Cambio</string>
@@ -103,4 +104,20 @@
     <string name="unit_system_metric">Métrico</string>
     <string name="unit_system_imperial_us">Imperial (EE. UU.)</string>
     <string name="unit_system_uk">Reino Unido</string>
+
+    <string name="action_settings">Ajustes</string>
+    <string name="nav_position_label">Posición de navegación</string>
+    <string name="nav_pos_bottom">Abajo</string>
+    <string name="nav_pos_top">Arriba</string>
+    <string name="nav_pos_left">Izquierda</string>
+    <string name="nav_pos_right">Derecha</string>
+    <string name="start_screen_label">Iniciar app en</string>
+    <string name="start_last_opened">Continuar donde dejaste</string>
+    <string name="chart_unit_label">Unidad del gráfico</string>
+    <string name="chart_purity_label">Pureza del gráfico</string>
+    <string name="graph_unit_oz">Onza Troy</string>
+    <string name="graph_unit_gram">Gramo</string>
+    <string name="graph_unit_gold_coin">Moneda Oro (8g)</string>
+    <string name="graph_unit_silver_coin">Moneda Plata (8g)</string>
+    <string name="suffix_coin">moneda</string>
 </resources>

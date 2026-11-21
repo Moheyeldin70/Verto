@@ -60,6 +60,7 @@
     <string name="range_1m">1A</string>
     <string name="range_3m">3A</string>
     <string name="range_1y">1Y</string>
+    <string name="range_5y">5Y</string>
     <string name="period_high">Yüksek</string>
     <string name="period_low">Düşük</string>
     <string name="period_change">Değişim</string>
@@ -103,4 +104,20 @@
     <string name="unit_system_metric">Metrik</string>
     <string name="unit_system_imperial_us">İngiliz (ABD)</string>
     <string name="unit_system_uk">Birleşik Krallık</string>
+
+    <string name="action_settings">Ayarlar</string>
+    <string name="nav_position_label">Gezinme Çubuğu Konumu</string>
+    <string name="nav_pos_bottom">Alt</string>
+    <string name="nav_pos_top">Üst</string>
+    <string name="nav_pos_left">Sol</string>
+    <string name="nav_pos_right">Sağ</string>
+    <string name="start_screen_label">Başlangıç Ekranı</string>
+    <string name="start_last_opened">Kaldığım yerden devam et</string>
+    <string name="chart_unit_label">Grafik Birimi</string>
+    <string name="chart_purity_label">Grafik Ayarı</string>
+    <string name="graph_unit_oz">Ons</string>
+    <string name="graph_unit_gram">Gram</string>
+    <string name="graph_unit_gold_coin">Altın Sikke (8g)</string>
+    <string name="graph_unit_silver_coin">Gümüş Sikke (8g)</string>
+    <string name="suffix_coin">sikke</string>
 </resources>

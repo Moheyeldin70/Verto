@@ -49,6 +49,7 @@ import com.example.data.repository.SyncStatus
 import com.example.domain.CountryMarket
 import com.example.domain.CountryMetalsCatalog
 import com.example.domain.FormattingUtils
+import com.example.ui.MetalChartUnit
 import com.example.ui.MetalType
 import com.example.ui.MetalsTrackerState
 import com.example.ui.components.ChartRangeSelector
@@ -62,6 +63,7 @@ import com.example.ui.theme.NumericSmallStyle
 import java.util.Locale
 
 private const val GRAMS_PER_TROY_OZ = 31.1034768
+private const val STANDARD_COIN_GRAMS = 8.0
 
 @Composable
 fun MetalsTrackerScreen(
@@ -73,6 +75,8 @@ fun MetalsTrackerScreen(
   onSelectMetal: (MetalType) -> Unit,
   onSelectCountry: (CountryMarket) -> Unit,
   onSelectRange: (ChartRange) -> Unit,
+  onSelectChartUnit: (MetalChartUnit) -> Unit,
+  onSelectChartPurity: (Double) -> Unit,
   onCalculatorGramsChange: (String) -> Unit,
   onCalculatorPurityChange: (Double) -> Unit,
   modifier: Modifier = Modifier,
@@ -194,6 +198,8 @@ fun MetalsTrackerScreen(
             currencyCode = currencyCode,
             accentColor = activeMetalColor,
             onSelectRange = onSelectRange,
+            onSelectChartUnit = onSelectChartUnit,
+            onSelectChartPurity = onSelectChartPurity,
           )
           BullionCalculatorCard(
             state = state,
@@ -227,6 +233,8 @@ fun MetalsTrackerScreen(
         currencyCode = currencyCode,
         accentColor = activeMetalColor,
         onSelectRange = onSelectRange,
+        onSelectChartUnit = onSelectChartUnit,
+        onSelectChartPurity = onSelectChartPurity,
       )
       PurityBreakdownCard(
         selectedMetal = state.selectedMetal,
@@ -354,37 +362,167 @@ private fun MetalTrendChartCard(
   currencyCode: String,
   accentColor: Color,
   onSelectRange: (ChartRange) -> Unit,
+  onSelectChartUnit: (MetalChartUnit) -> Unit,
+  onSelectChartPurity: (Double) -> Unit,
 ) {
+  val unitFactor =
+    when (state.chartUnit) {
+      MetalChartUnit.OZ -> 1.0
+      MetalChartUnit.GRAM -> 1.0 / GRAMS_PER_TROY_OZ
+      MetalChartUnit.COIN -> STANDARD_COIN_GRAMS / GRAMS_PER_TROY_OZ
+    }
+
+  val purities =
+    if (state.selectedMetal == MetalType.GOLD) {
+      listOf(
+        "24K" to 1.0,
+        "22K" to (22.0 / 24.0),
+        "21K" to (21.0 / 24.0),
+        "18K" to (18.0 / 24.0),
+        "14K" to (14.0 / 24.0),
+      )
+    } else {
+      listOf(
+        "999" to 1.0,
+        "925" to 0.925,
+        "900" to 0.900,
+        "800" to 0.800,
+      )
+    }
+
+  val activePurityLabel =
+    purities.minByOrNull { kotlin.math.abs(it.second - state.chartPurityFraction) }?.first
+      ?: if (state.selectedMetal == MetalType.GOLD) "24K" else "999"
+
+  val coinLabelRes =
+    if (state.selectedMetal == MetalType.GOLD) R.string.graph_unit_gold_coin
+    else R.string.graph_unit_silver_coin
+
+  val unitSuffix =
+    when (state.chartUnit) {
+      MetalChartUnit.OZ -> "oz"
+      MetalChartUnit.GRAM -> "g"
+      MetalChartUnit.COIN -> stringResource(R.string.suffix_coin)
+    }
+
+  val scaledPoints =
+    remember(state.chartPoints, unitFactor, state.chartPurityFraction) {
+      val combinedFactor = unitFactor * state.chartPurityFraction
+      state.chartPoints.map { ChartSeriesPoint(it.label, it.value * combinedFactor) }
+    }
+
   Card(
     shape = MaterialTheme.shapes.large,
     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
     border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
   ) {
     Column(modifier = Modifier.fillMaxWidth().padding(18.dp)) {
-      Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-      ) {
-        Column(modifier = Modifier.weight(1f)) {
+      Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.SpaceBetween,
+          verticalAlignment = Alignment.CenterVertically,
+        ) {
           Text(
             text = stringResource(R.string.metal_chart_title),
             style = MaterialTheme.typography.titleMedium,
           )
           Text(
-            text = "${state.selectedMetal.code} / $currencyCode (oz)",
+            text = "${state.selectedMetal.code} / $currencyCode · $activePurityLabel ($unitSuffix)",
             style = MaterialTheme.typography.bodySmall,
             color = accentColor,
             fontWeight = FontWeight.SemiBold,
           )
         }
-        ChartRangeSelector(selected = state.chartRange, onSelect = onSelectRange)
+        Spacer(Modifier.height(10.dp))
+        ChartRangeSelector(
+          selected = state.chartRange,
+          onSelect = onSelectRange,
+          modifier = Modifier.fillMaxWidth(),
+        )
+        Spacer(Modifier.height(10.dp))
+        // Graph Unit Selector: Troy Oz / Gram / Gold or Silver Coin
+        Text(
+          text = stringResource(R.string.chart_unit_label),
+          style = MaterialTheme.typography.labelSmall,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.height(6.dp))
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+          listOf(
+            MetalChartUnit.OZ to R.string.graph_unit_oz,
+            MetalChartUnit.GRAM to R.string.graph_unit_gram,
+            MetalChartUnit.COIN to coinLabelRes,
+          ).forEach { (unitOption, labelRes) ->
+            val active = state.chartUnit == unitOption
+            Surface(
+              onClick = { onSelectChartUnit(unitOption) },
+              shape = RoundedCornerShape(10.dp),
+              color =
+                if (active) accentColor
+                else MaterialTheme.colorScheme.surfaceVariant,
+              modifier = Modifier.weight(1f).height(48.dp).testTag("metal_chart_unit_${unitOption.name.lowercase()}"),
+            ) {
+              Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(horizontal = 6.dp)) {
+                Text(
+                  text = stringResource(labelRes),
+                  style = MaterialTheme.typography.labelSmall,
+                  fontWeight = FontWeight.SemiBold,
+                  color =
+                    if (active) Color.White
+                    else MaterialTheme.colorScheme.onSurfaceVariant,
+                  maxLines = 1,
+                  overflow = TextOverflow.Ellipsis,
+                )
+              }
+            }
+          }
+        }
+        Spacer(Modifier.height(10.dp))
+        // Graph Purity Selector below the unit options
+        Text(
+          text = stringResource(R.string.chart_purity_label),
+          style = MaterialTheme.typography.labelSmall,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.height(6.dp))
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+          purities.forEach { (label, frac) ->
+            val active = kotlin.math.abs(state.chartPurityFraction - frac) < 0.001
+            Surface(
+              onClick = { onSelectChartPurity(frac) },
+              shape = RoundedCornerShape(10.dp),
+              color =
+                if (active) MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.surfaceVariant,
+              modifier = Modifier.weight(1f).height(48.dp).testTag("metal_chart_purity_${label.lowercase()}"),
+            ) {
+              Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(horizontal = 4.dp)) {
+                Text(
+                  text = label,
+                  style = MaterialTheme.typography.labelSmall,
+                  fontWeight = FontWeight.Bold,
+                  color =
+                    if (active) MaterialTheme.colorScheme.onPrimary
+                    else MaterialTheme.colorScheme.onSurfaceVariant,
+                  maxLines = 1,
+                )
+              }
+            }
+          }
+        }
       }
       Spacer(Modifier.height(14.dp))
       FinancialTrendChart(
-        points = state.chartPoints.map { ChartSeriesPoint(it.label, it.value) },
+        points = scaledPoints,
         accentColor = accentColor,
-        valueSuffix = "$currencyCode/oz",
+        valueSuffix = "$currencyCode/$unitSuffix",
         isLoading = state.isChartLoading,
       )
     }

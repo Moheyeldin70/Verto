@@ -60,6 +60,7 @@
     <string name="range_1m">1개월</string>
     <string name="range_3m">3개월</string>
     <string name="range_1y">1년</string>
+    <string name="range_5y">5년</string>
     <string name="period_high">최고</string>
     <string name="period_low">최저</string>
     <string name="period_change">변동</string>
@@ -103,4 +104,20 @@
     <string name="unit_system_metric">미터법</string>
     <string name="unit_system_imperial_us">야드파운드법 (미국)</string>
     <string name="unit_system_uk">영국식</string>
+
+    <string name="action_settings">설정</string>
+    <string name="nav_position_label">탐색 바 위치</string>
+    <string name="nav_pos_bottom">아래</string>
+    <string name="nav_pos_top">위</string>
+    <string name="nav_pos_left">왼쪽</string>
+    <string name="nav_pos_right">오른쪽</string>
+    <string name="start_screen_label">시작 화면</string>
+    <string name="start_last_opened">마지막 위치에서 계속</string>
+    <string name="chart_unit_label">그래프 단위</string>
+    <string name="chart_purity_label">그래프 순도</string>
+    <string name="graph_unit_oz">온스</string>
+    <string name="graph_unit_gram">그램</string>
+    <string name="graph_unit_gold_coin">금화 (8g)</string>
+    <string name="graph_unit_silver_coin">은화 (8g)</string>
+    <string name="suffix_coin">코인</string>
 </resources>

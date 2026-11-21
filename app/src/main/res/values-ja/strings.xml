@@ -72,6 +72,7 @@
     <string name="range_1m">1ヶ月</string>
     <string name="range_3m">3ヶ月</string>
     <string name="range_1y">1年</string>
+    <string name="range_5y">5年</string>
     <string name="period_high">高値</string>
     <string name="period_low">安値</string>
     <string name="period_change">変動</string>
@@ -118,4 +119,20 @@
     <string name="unit_system_metric">メートル法</string>
     <string name="unit_system_imperial_us">ヤード・ポンド法 (米国)</string>
     <string name="unit_system_uk">英国式</string>
+
+    <string name="action_settings">設定</string>
+    <string name="nav_position_label">ナビゲーションバーの位置</string>
+    <string name="nav_pos_bottom">下</string>
+    <string name="nav_pos_top">上</string>
+    <string name="nav_pos_left">左</string>
+    <string name="nav_pos_right">右</string>
+    <string name="start_screen_label">起動時の画面</string>
+    <string name="start_last_opened">前回の続き</string>
+    <string name="chart_unit_label">グラフ単位</string>
+    <string name="chart_purity_label">グラフ純度</string>
+    <string name="graph_unit_oz">オンス</string>
+    <string name="graph_unit_gram">グラム</string>
+    <string name="graph_unit_gold_coin">金貨 (8g)</string>
+    <string name="graph_unit_silver_coin">銀貨 (8g)</string>
+    <string name="suffix_coin">コイン</string>
 </resources>

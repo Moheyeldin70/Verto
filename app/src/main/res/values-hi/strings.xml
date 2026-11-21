@@ -60,6 +60,7 @@
     <string name="range_1m">1माह</string>
     <string name="range_3m">3माह</string>
     <string name="range_1y">1वर्ष</string>
+    <string name="range_5y">5वर्ष</string>
     <string name="period_high">उच्च</string>
     <string name="period_low">निम्न</string>
     <string name="period_change">बदलाव</string>
@@ -103,4 +104,20 @@
     <string name="unit_system_metric">मीट्रिक</string>
     <string name="unit_system_imperial_us">इम्पीरियल (US)</string>
     <string name="unit_system_uk">UK</string>
+
+    <string name="action_settings">सेटिंग्स</string>
+    <string name="nav_position_label">नेविगेशन बार स्थिति</string>
+    <string name="nav_pos_bottom">नीचे</string>
+    <string name="nav_pos_top">ऊपर</string>
+    <string name="nav_pos_left">बाएँ</string>
+    <string name="nav_pos_right">दाएँ</string>
+    <string name="start_screen_label">ऐप कहाँ से शुरू करें</string>
+    <string name="start_last_opened">जहाँ छोड़ा था वहाँ से</string>
+    <string name="chart_unit_label">ग्राफ इकाई</string>
+    <string name="chart_purity_label">ग्राफ शुद्धता</string>
+    <string name="graph_unit_oz">औंस</string>
+    <string name="graph_unit_gram">ग्राम</string>
+    <string name="graph_unit_gold_coin">सोने का सिक्का (8g)</string>
+    <string name="graph_unit_silver_coin">चांदी का सिक्का (8g)</string>
+    <string name="suffix_coin">सिक्का</string>
 </resources>

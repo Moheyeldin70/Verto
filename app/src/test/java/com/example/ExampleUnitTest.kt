@@ -1,15 +1,20 @@
 package com.example
 
 import com.example.data.local.AppLanguage
+import com.example.data.local.NavBarPosition
+import com.example.data.local.StartScreenPreference
 import com.example.data.local.UserPreferences
+import com.example.data.repository.ChartRange
 import com.example.domain.CountryMetalsCatalog
 import com.example.domain.CurrencyCatalog
 import com.example.domain.FormattingUtils
+import com.example.domain.HistoricalSeriesParser
 import com.example.domain.LocationLocaleResolver
 import com.example.domain.MeasurementLocalePreference
 import com.example.domain.MeasurementSystem
 import com.example.domain.UnitCatalog
 import com.example.domain.UnitCategory
+import com.example.ui.MetalChartUnit
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -91,5 +96,55 @@ class ExampleUnitTest {
 
     // Default language remains the device system language
     assertEquals(AppLanguage.SYSTEM, UserPreferences().language)
+  }
+
+  @Test
+  fun historicalSeriesParser_handlesFiveYearFeedsAndDownsampling() {
+    assertEquals(1825, ChartRange.Y5.days)
+
+    val csv =
+      """
+      Date,Open,High,Low,Close
+      2022-01-02,1800.0,1830.0,1790.0,1815.5
+      2023-06-11,1950.0,1970.0,1930.0,1960.2
+      2026-11-15,2600.0,2640.0,2590.0,2635.0
+      """.trimIndent()
+    val stooqPoints = HistoricalSeriesParser.parseStooqCsv(csv, 0L)
+    assertEquals(3, stooqPoints.size)
+    assertEquals(1815.5, stooqPoints.first().second, 1e-6)
+    assertEquals(2635.0, stooqPoints.last().second, 1e-6)
+
+    val dense = (0 until 260).map { idx -> (idx * 7L * 86_400_000L) to (1800.0 + idx) }
+    val sampled = HistoricalSeriesParser.downsamplePairs(dense, maxPoints = 75)
+    assertTrue(sampled.size <= 75)
+    assertEquals(dense.first(), sampled.first())
+    assertEquals(dense.last(), sampled.last())
+
+    val fx = listOf(stooqPoints[0].first to 15.7, stooqPoints[1].first to 30.9, stooqPoints[2].first to 49.5)
+    val inEgp = HistoricalSeriesParser.multiplySeriesByFx(stooqPoints, fx, fallbackFxRate = 50.0)
+    assertEquals(1815.5 * 15.7, inEgp[0].second, 1e-4)
+    assertEquals(2635.0 * 49.5, inEgp[2].second, 1e-4)
+
+    val cross = HistoricalSeriesParser.alignCrossRateSeries(
+      usdToFrom = listOf(stooqPoints[0].first to 0.90, stooqPoints[2].first to 0.95),
+      usdToTo = fx,
+    )
+    assertEquals(2, cross.size)
+    assertEquals(15.7 / 0.90, cross[0].second, 1e-4)
+    assertEquals(49.5 / 0.95, cross[1].second, 1e-4)
+  }
+
+  @Test
+  fun settingsEnumsAndMetalChartUnits_roundTripCleanly() {
+    assertEquals(NavBarPosition.BOTTOM, NavBarPosition.fromKey(null))
+    assertEquals(NavBarPosition.TOP, NavBarPosition.fromKey("TOP"))
+    assertEquals(NavBarPosition.LEFT, NavBarPosition.fromKey("LEFT"))
+    assertEquals(NavBarPosition.RIGHT, NavBarPosition.fromKey("RIGHT"))
+
+    assertEquals(StartScreenPreference.UNITS, StartScreenPreference.fromKey(null))
+    assertEquals(StartScreenPreference.LAST_OPENED, StartScreenPreference.fromKey("LAST_OPENED"))
+    assertEquals(StartScreenPreference.METALS, StartScreenPreference.fromKey("METALS"))
+
+    assertEquals(3, MetalChartUnit.entries.size)
   }
 }
