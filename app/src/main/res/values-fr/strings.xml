@@ -120,4 +120,35 @@
     <string name="graph_unit_gold_coin">Pièce Or (8g)</string>
     <string name="graph_unit_silver_coin">Pièce Argent (8g)</string>
     <string name="suffix_coin">pièce</string>
+
+    <string name="action_share">Partager</string>
+    <string name="share_sheet_title">Partager et exporter</string>
+    <string name="share_chooser_title">Partager via</string>
+    <string name="share_mode_chart">Graphique</string>
+    <string name="share_mode_summary">Résumé</string>
+    <string name="share_image_preview_desc">Aperçu de l\'image exportable</string>
+    <string name="share_text_preview_label">Résumé texte</string>
+    <string name="share_as_text">Partager texte</string>
+    <string name="share_as_image">Partager image</string>
+    <string name="share_error_message">Impossible d\'ouvrir le partage</string>
+
+    <string name="ai_fab_label">Demander IA</string>
+    <string name="ai_sheet_title">Analyste IA Verto</string>
+    <string name="ai_welcome_title">Discuter, expliquer et prévoir</string>
+    <string name="ai_welcome_body">Posez des questions sur vos conversions, les moteurs des devises, les titrages d\'or et d\'argent ou les perspectives de prix.</string>
+    <string name="ai_input_hint">Question sur les prix, tendances ou conversions…</string>
+    <string name="ai_send">Envoyer</string>
+    <string name="ai_thinking">Analyse en cours…</string>
+    <string name="ai_retry">Réessayer</string>
+    <string name="ai_offline_notice">Hors ligne — reconnectez-vous pour consulter l\'IA.</string>
+    <string name="ai_disclaimer">Analyses IA à titre informatif uniquement, pas de conseil financier.</string>
+    <string name="ai_prompt_unit_explain">Expliquer la formule</string>
+    <string name="ai_prompt_unit_realworld">Exemples concrets</string>
+    <string name="ai_prompt_unit_compare">Comparer les unités</string>
+    <string name="ai_prompt_fx_explain">Expliquer la tendance</string>
+    <string name="ai_prompt_fx_predict">Prévisions du taux</string>
+    <string name="ai_prompt_fx_tips">Conseils de change</string>
+    <string name="ai_prompt_metal_explain">Expliquer or &amp; argent</string>
+    <string name="ai_prompt_metal_predict">Scénarios de prix</string>
+    <string name="ai_prompt_metal_purity">Comparer les carats</string>
 </resources>

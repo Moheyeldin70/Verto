@@ -120,4 +120,35 @@
     <string name="graph_unit_gold_coin">सोने का सिक्का (8g)</string>
     <string name="graph_unit_silver_coin">चांदी का सिक्का (8g)</string>
     <string name="suffix_coin">सिक्का</string>
+
+    <string name="action_share">साझा करें</string>
+    <string name="share_sheet_title">साझा व निर्यात करें</string>
+    <string name="share_chooser_title">इसके माध्यम से साझा करें</string>
+    <string name="share_mode_chart">रुझान चार्ट</string>
+    <string name="share_mode_summary">सारांश कार्ड</string>
+    <string name="share_image_preview_desc">निर्यात छवि पूर्वावलोकन</string>
+    <string name="share_text_preview_label">टेक्स्ट सारांश</string>
+    <string name="share_as_text">टेक्स्ट साझा करें</string>
+    <string name="share_as_image">छवि साझा करें</string>
+    <string name="share_error_message">शेयर शीट खोलने में असमर्थ</string>
+
+    <string name="ai_fab_label">AI से पूछें</string>
+    <string name="ai_sheet_title">Verto AI विश्लेषक</string>
+    <string name="ai_welcome_title">चर्चा, व्याख्या और पूर्वानुमान</string>
+    <string name="ai_welcome_body">अपनी वर्तमान गणना, मुद्रा दरों, सोना-चांदी शुद्धता या संभावित मूल्य परिदृश्यों के बारे में पूछें।</string>
+    <string name="ai_input_hint">कीमतों, रुझानों या रूपांतरण के बारे में पूछें…</string>
+    <string name="ai_send">भेजें</string>
+    <string name="ai_thinking">विश्लेषण जारी…</string>
+    <string name="ai_retry">पुनः प्रयास</string>
+    <string name="ai_offline_notice">ऑफ़लाइन — AI से पूछने के लिए इंटरनेट से जुड़ें।</string>
+    <string name="ai_disclaimer">AI विश्लेषण केवल जानकारी के लिए है, वित्तीय सलाह नहीं।</string>
+    <string name="ai_prompt_unit_explain">सूत्र समझाएं</string>
+    <string name="ai_prompt_unit_realworld">व्यावहारिक उदाहरण</string>
+    <string name="ai_prompt_unit_compare">अन्य इकाइयों से तुलना</string>
+    <string name="ai_prompt_fx_explain">रुझान समझाएं</string>
+    <string name="ai_prompt_fx_predict">दर पूर्वानुमान</string>
+    <string name="ai_prompt_fx_tips">रूपांतरण सुझाव</string>
+    <string name="ai_prompt_metal_explain">सोना-चांदी चाल समझाएं</string>
+    <string name="ai_prompt_metal_predict">मूल्य परिदृश्य अनुमान</string>
+    <string name="ai_prompt_metal_purity">शुद्धता तुलना</string>
 </resources>

@@ -120,4 +120,35 @@
     <string name="graph_unit_gold_coin">Altın Sikke (8g)</string>
     <string name="graph_unit_silver_coin">Gümüş Sikke (8g)</string>
     <string name="suffix_coin">sikke</string>
+
+    <string name="action_share">Paylaş</string>
+    <string name="share_sheet_title">Paylaş ve Dışa Aktar</string>
+    <string name="share_chooser_title">Şununla paylaş</string>
+    <string name="share_mode_chart">Trend Grafiği</string>
+    <string name="share_mode_summary">Özet Kartı</string>
+    <string name="share_image_preview_desc">Dışa aktarılabilir görsel önizlemesi</string>
+    <string name="share_text_preview_label">Metin Özeti</string>
+    <string name="share_as_text">Metin Paylaş</string>
+    <string name="share_as_image">Görsel Paylaş</string>
+    <string name="share_error_message">Paylaşım ekranı açılamadı</string>
+
+    <string name="ai_fab_label">AI\'ya Sor</string>
+    <string name="ai_sheet_title">Verto AI Analisti</string>
+    <string name="ai_welcome_title">Tartış, açıkla ve öngör</string>
+    <string name="ai_welcome_body">Mevcut dönüşümünüz, döviz trendleri, altın ve gümüş ayarları veya fiyat senaryoları hakkında sorular sorun.</string>
+    <string name="ai_input_hint">Fiyatlar, trendler veya dönüşümler hakkında sor…</string>
+    <string name="ai_send">Gönder</string>
+    <string name="ai_thinking">Analiz ediliyor…</string>
+    <string name="ai_retry">Tekrar Dene</string>
+    <string name="ai_offline_notice">Çevrimdışısınız — AI kullanmak için internete bağlanın.</string>
+    <string name="ai_disclaimer">AI analizleri yalnızca bilgilendirme amaçlıdır, yatırım tavsiyesi değildir.</string>
+    <string name="ai_prompt_unit_explain">Formülü açıkla</string>
+    <string name="ai_prompt_unit_realworld">Günlük örnekler</string>
+    <string name="ai_prompt_unit_compare">Birimleri karşılaştır</string>
+    <string name="ai_prompt_fx_explain">Bu trendi açıkla</string>
+    <string name="ai_prompt_fx_predict">Kur öngörüsü</string>
+    <string name="ai_prompt_fx_tips">Döviz ipuçları</string>
+    <string name="ai_prompt_metal_explain">Altın ve gümüşü açıkla</string>
+    <string name="ai_prompt_metal_predict">Fiyat senaryoları</string>
+    <string name="ai_prompt_metal_purity">Ayarları karşılaştır</string>
 </resources>

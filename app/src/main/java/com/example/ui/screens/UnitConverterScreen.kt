@@ -80,7 +80,7 @@ fun UnitConverterScreen(
   val copiedMsg = stringResource(R.string.copied_feedback)
 
   Column(
-    modifier = modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(bottom = 24.dp),
+    modifier = modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(bottom = 88.dp),
   ) {
     // Category Chips
     LazyRow(

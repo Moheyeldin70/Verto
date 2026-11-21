@@ -17,6 +17,8 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -31,6 +33,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
@@ -41,15 +44,15 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CurrencyExchange
 import androidx.compose.material.icons.outlined.Diamond
 import androidx.compose.material.icons.outlined.Straighten
+import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.CurrencyExchange
-import androidx.compose.material.icons.rounded.DarkMode
 import androidx.compose.material.icons.rounded.Diamond
-import androidx.compose.material.icons.rounded.LightMode
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material.icons.rounded.Straighten
-import androidx.compose.material.icons.rounded.SwapHoriz
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -83,34 +86,43 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.core.text.layoutDirection
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.R
+import com.example.ai.VertoAiContextBuilder
 import com.example.data.local.AppLanguage
 import com.example.data.local.NavBarPosition
 import com.example.data.local.ThemeMode
 import com.example.domain.CountryMetalsCatalog
+import com.example.domain.ShareExportHelper
+import com.example.ui.components.AiAssistantSheet
 import com.example.ui.components.SettingsSheet
+import com.example.ui.components.ShareExportSheet
 import com.example.ui.components.StatusPill
 import com.example.ui.screens.CurrencyConverterScreen
 import com.example.ui.screens.MetalsTrackerScreen
 import com.example.ui.screens.UnitConverterScreen
+import com.example.ui.theme.LauncherSurface
+import com.example.ui.theme.LocalFinancialColors
 import com.example.ui.theme.VertoTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.Locale
+import kotlin.math.roundToInt
 
 private class LocalizedActivityContextWrapper(
   base: Context,
@@ -168,7 +180,7 @@ fun VertoApp(viewModel: MainViewModel = viewModel()) {
 
   var showLaunchSplash by remember { mutableStateOf(true) }
   LaunchedEffect(Unit) {
-    delay(780L)
+    delay(920L)
     showLaunchSplash = false
   }
 
@@ -202,11 +214,18 @@ fun VertoApp(viewModel: MainViewModel = viewModel()) {
 
 @Composable
 private fun VertoLaunchOverlay() {
-  val iconScale = remember { Animatable(0.62f) }
-  val iconRotation = remember { Animatable(-18f) }
+  val financial = LocalFinancialColors.current
+  val iconScale = remember { Animatable(0.72f) }
+  val iconOffsetDp = remember { Animatable(24f) }
+  val iconAlpha = remember { Animatable(0f) }
+  val glowScale = remember { Animatable(0.6f) }
   val textAlpha = remember { Animatable(0f) }
+  val textOffsetDp = remember { Animatable(14f) }
 
   LaunchedEffect(Unit) {
+    launch {
+      iconAlpha.animateTo(targetValue = 1f, animationSpec = tween(260))
+    }
     launch {
       iconScale.animateTo(
         targetValue = 1f,
@@ -218,20 +237,32 @@ private fun VertoLaunchOverlay() {
       )
     }
     launch {
-      iconRotation.animateTo(
+      iconOffsetDp.animateTo(
         targetValue = 0f,
-        animationSpec = tween(durationMillis = 520, easing = FastOutSlowInEasing),
+        animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing),
       )
     }
     launch {
-      delay(120L)
-      textAlpha.animateTo(targetValue = 1f, animationSpec = tween(360))
+      glowScale.animateTo(
+        targetValue = 1.15f,
+        animationSpec = tween(durationMillis = 700, easing = FastOutSlowInEasing),
+      )
+    }
+    launch {
+      delay(160L)
+      launch { textAlpha.animateTo(targetValue = 1f, animationSpec = tween(360)) }
+      launch {
+        textOffsetDp.animateTo(
+          targetValue = 0f,
+          animationSpec = tween(durationMillis = 360, easing = FastOutSlowInEasing),
+        )
+      }
     }
   }
 
   Surface(
     modifier = Modifier.fillMaxSize(),
-    color = MaterialTheme.colorScheme.background,
+    color = LauncherSurface,
   ) {
     Box(
       modifier =
@@ -241,41 +272,86 @@ private fun VertoLaunchOverlay() {
             Brush.radialGradient(
               colors =
                 listOf(
-                  MaterialTheme.colorScheme.primary.copy(alpha = 0.16f),
+                  MaterialTheme.colorScheme.primary.copy(alpha = 0.22f),
+                  financial.gold.copy(alpha = 0.08f),
                   Color.Transparent,
                 ),
             ),
           ),
       contentAlignment = Alignment.Center,
     ) {
+      Box(
+        modifier =
+          Modifier
+            .size(180.dp)
+            .scale(glowScale.value)
+            .background(
+              Brush.radialGradient(
+                colors =
+                  listOf(
+                    financial.gold.copy(alpha = 0.20f),
+                    MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                    Color.Transparent,
+                  ),
+              ),
+            ),
+      )
+
       Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Surface(
-          shape = RoundedCornerShape(28.dp),
-          color = MaterialTheme.colorScheme.primary,
-          tonalElevation = 8.dp,
-          shadowElevation = 12.dp,
+          shape = RoundedCornerShape(30.dp),
+          color = LauncherSurface,
+          border =
+            BorderStroke(
+              width = 1.5.dp,
+              brush =
+                Brush.linearGradient(
+                  colors =
+                    listOf(
+                      MaterialTheme.colorScheme.primary.copy(alpha = 0.75f),
+                      financial.gold.copy(alpha = 0.85f),
+                    ),
+                ),
+            ),
+          shadowElevation = 18.dp,
           modifier =
             Modifier
-              .size(88.dp)
+              .size(108.dp)
+              .offset { IntOffset(0, iconOffsetDp.value.dp.roundToPx()) }
               .scale(iconScale.value)
-              .graphicsLayer { rotationZ = iconRotation.value },
+              .alpha(iconAlpha.value),
         ) {
-          Box(contentAlignment = Alignment.Center) {
-            Icon(
-              imageVector = Icons.Rounded.SwapHoriz,
-              contentDescription = null,
-              tint = MaterialTheme.colorScheme.onPrimary,
-              modifier = Modifier.size(46.dp),
-            )
-          }
+          Image(
+            painter = painterResource(R.drawable.ic_launcher_art),
+            contentDescription = stringResource(R.string.app_name),
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize().scale(1.12f),
+          )
         }
-        Spacer(Modifier.height(18.dp))
+        Spacer(Modifier.height(20.dp))
         Text(
           text = stringResource(R.string.app_name),
           style = MaterialTheme.typography.headlineLarge,
           fontWeight = FontWeight.ExtraBold,
-          color = MaterialTheme.colorScheme.onBackground,
-          modifier = Modifier.alpha(textAlpha.value),
+          color = Color.White,
+          modifier =
+            Modifier
+              .offset { IntOffset(0, textOffsetDp.value.dp.roundToPx()) }
+              .alpha(textAlpha.value),
+        )
+        Spacer(Modifier.height(10.dp))
+        Box(
+          modifier =
+            Modifier
+              .width(52.dp)
+              .height(3.dp)
+              .alpha(textAlpha.value)
+              .clip(RoundedCornerShape(999.dp))
+              .background(
+                Brush.horizontalGradient(
+                  colors = listOf(MaterialTheme.colorScheme.primary, financial.gold),
+                ),
+              ),
         )
       }
     }
@@ -307,8 +383,11 @@ private fun VertoMainContent(
   val syncStatus by viewModel.syncStatus.collectAsStateWithLifecycle()
   val prefs by viewModel.userPreferences.collectAsStateWithLifecycle()
   val isDetectingLocation by viewModel.isDetectingLocation.collectAsStateWithLifecycle()
+  val aiState by viewModel.aiState.collectAsStateWithLifecycle()
 
   var showSettingsSheet by remember { mutableStateOf(false) }
+  var showShareSheet by remember { mutableStateOf(false) }
+  var showAiSheet by remember { mutableStateOf(false) }
   var explicitLocationRequest by remember { mutableStateOf(false) }
   val snackbarHostState = remember { SnackbarHostState() }
   val scope = rememberCoroutineScope()
@@ -412,14 +491,12 @@ private fun VertoMainContent(
               }
             }
             IconButton(
-              onClick = {
-                viewModel.setThemeMode(if (isDarkTheme) ThemeMode.LIGHT else ThemeMode.DARK)
-              },
-              modifier = Modifier.size(48.dp).testTag("quick_theme_toggle"),
+              onClick = { showShareSheet = true },
+              modifier = Modifier.size(48.dp).testTag("share_button"),
             ) {
               Icon(
-                imageVector = if (isDarkTheme) Icons.Rounded.LightMode else Icons.Rounded.DarkMode,
-                contentDescription = stringResource(R.string.action_theme),
+                imageVector = Icons.Rounded.Share,
+                contentDescription = stringResource(R.string.action_share),
               )
             }
             IconButton(
@@ -437,6 +514,26 @@ private fun VertoMainContent(
               containerColor = MaterialTheme.colorScheme.background,
               titleContentColor = MaterialTheme.colorScheme.onBackground,
             ),
+        )
+      },
+      floatingActionButton = {
+        ExtendedFloatingActionButton(
+          onClick = { showAiSheet = true },
+          icon = {
+            Icon(
+              imageVector = Icons.Rounded.AutoAwesome,
+              contentDescription = null,
+            )
+          },
+          text = {
+            Text(
+              text = stringResource(R.string.ai_fab_label),
+              fontWeight = FontWeight.SemiBold,
+            )
+          },
+          containerColor = MaterialTheme.colorScheme.primary,
+          contentColor = MaterialTheme.colorScheme.onPrimary,
+          modifier = Modifier.testTag("ai_assistant_button"),
         )
       },
       bottomBar = {
@@ -599,6 +696,81 @@ private fun VertoMainContent(
       onDismiss = { showSettingsSheet = false },
     )
   }
+
+  if (showShareSheet) {
+    val categoryDisplayTitle = stringResource(unitState.category.labelRes)
+    val tabDisplayTitle = stringResource(topTitleRes)
+    val chartDisplayTitle =
+      when (activeTab) {
+        AppTab.CURRENCY -> stringResource(R.string.historical_chart_title)
+        AppTab.METALS -> stringResource(R.string.metal_chart_title)
+        AppTab.UNITS -> ""
+      }
+    val liveLabel = stringResource(R.string.status_live)
+    val offlineLabel = stringResource(R.string.status_cached)
+
+    val sharePayload =
+      remember(
+        activeTab,
+        unitState,
+        currencyState,
+        metalsState,
+        ratesMap,
+        syncStatus,
+        displayLocale,
+        isDarkTheme,
+        categoryDisplayTitle,
+        tabDisplayTitle,
+        chartDisplayTitle,
+        liveLabel,
+        offlineLabel,
+      ) {
+        ShareExportHelper.buildPayload(
+          activeTab = activeTab,
+          unitState = unitState,
+          currencyState = currencyState,
+          metalsState = metalsState,
+          ratesMap = ratesMap,
+          syncStatus = syncStatus,
+          displayLocale = displayLocale,
+          isDarkTheme = isDarkTheme,
+          categoryDisplayTitle = categoryDisplayTitle,
+          tabTitle = tabDisplayTitle,
+          chartDisplayTitle = chartDisplayTitle,
+          liveLabel = liveLabel,
+          offlineLabel = offlineLabel,
+        )
+      }
+
+    ShareExportSheet(
+      payload = sharePayload,
+      onShowMessage = showSnackbar,
+      onDismiss = { showShareSheet = false },
+    )
+  }
+
+  if (showAiSheet) {
+    val contextLabel =
+      remember(activeTab, unitState, currencyState, metalsState, displayLocale) {
+        VertoAiContextBuilder.buildShortContextLabel(
+          activeTab = activeTab,
+          unitState = unitState,
+          currencyState = currencyState,
+          metalsState = metalsState,
+          displayLocale = displayLocale,
+        )
+      }
+    AiAssistantSheet(
+      activeTab = activeTab,
+      contextLabel = contextLabel,
+      isNetworkAvailable = syncStatus.isNetworkAvailable,
+      aiState = aiState,
+      onSendMessage = { prompt -> viewModel.sendAiMessage(prompt, displayLocale) },
+      onClearChat = viewModel::clearAiChat,
+      onDismissError = viewModel::dismissAiError,
+      onDismiss = { showAiSheet = false },
+    )
+  }
 }
 
 @Composable
@@ -671,8 +843,9 @@ private fun VertoSideRail(
     containerColor = MaterialTheme.colorScheme.surface,
     modifier = Modifier.fillMaxHeight(),
   ) {
-    Spacer(Modifier.size(12.dp))
-    tabs.forEach { item ->
+    Spacer(Modifier.weight(1f))
+    tabs.forEachIndexed { index, item ->
+      if (index > 0) Spacer(Modifier.height(12.dp))
       val selected = activeTab == item.tab
       NavigationRailItem(
         selected = selected,
@@ -699,5 +872,6 @@ private fun VertoSideRail(
         modifier = Modifier.testTag("rail_${item.tab.name.lowercase()}"),
       )
     }
+    Spacer(Modifier.weight(1f))
   }
 }

@@ -1,10 +1,13 @@
 package com.example
 
+import com.example.ai.VertoAiContextBuilder
 import com.example.data.local.AppLanguage
+import com.example.data.local.CachedChartPointEntity
 import com.example.data.local.NavBarPosition
 import com.example.data.local.StartScreenPreference
 import com.example.data.local.UserPreferences
 import com.example.data.repository.ChartRange
+import com.example.data.repository.SyncStatus
 import com.example.domain.CountryMetalsCatalog
 import com.example.domain.CurrencyCatalog
 import com.example.domain.FormattingUtils
@@ -12,10 +15,17 @@ import com.example.domain.HistoricalSeriesParser
 import com.example.domain.LocationLocaleResolver
 import com.example.domain.MeasurementLocalePreference
 import com.example.domain.MeasurementSystem
+import com.example.domain.ShareExportHelper
 import com.example.domain.UnitCatalog
 import com.example.domain.UnitCategory
+import com.example.ui.AppTab
+import com.example.ui.CurrencyConverterState
 import com.example.ui.MetalChartUnit
+import com.example.ui.MetalType
+import com.example.ui.MetalsTrackerState
+import com.example.ui.UnitConverterState
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.util.Locale
@@ -146,5 +156,82 @@ class ExampleUnitTest {
     assertEquals(StartScreenPreference.METALS, StartScreenPreference.fromKey("METALS"))
 
     assertEquals(3, MetalChartUnit.entries.size)
+  }
+
+  @Test
+  fun shareExportHelper_buildsRichTextAndChartPayloads() {
+    val unitsPayload =
+      ShareExportHelper.buildPayload(
+        activeTab = AppTab.UNITS,
+        unitState = UnitConverterState(inputText = "10"),
+        currencyState = CurrencyConverterState(),
+        metalsState = MetalsTrackerState(),
+        ratesMap = emptyMap(),
+        syncStatus = SyncStatus(isLive = false, isSyncing = false, isNetworkAvailable = false, lastUpdatedMillis = 0L),
+        displayLocale = Locale.US,
+        isDarkTheme = true,
+        categoryDisplayTitle = "Length",
+        tabTitle = "Unit Converter",
+        chartDisplayTitle = "",
+        liveLabel = "Live",
+        offlineLabel = "Offline",
+      )
+    assertFalse(unitsPayload.hasChart)
+    assertTrue(unitsPayload.textSummary.contains("10"))
+    assertTrue(unitsPayload.textSummary.contains("Formula:"))
+
+    val fxPoints =
+      listOf(
+        CachedChartPointEntity("FX_USD_EUR_M1_0", "FX_USD_EUR_M1", 0, 1_700_000_000_000L, 0.90, "Oct 21"),
+        CachedChartPointEntity("FX_USD_EUR_M1_1", "FX_USD_EUR_M1", 1, 1_700_864_000_000L, 0.95, "Nov 21"),
+      )
+    val fxPayload =
+      ShareExportHelper.buildPayload(
+        activeTab = AppTab.CURRENCY,
+        unitState = UnitConverterState(),
+        currencyState = CurrencyConverterState(fromCode = "USD", toCode = "EUR", inputText = "100", chartPoints = fxPoints),
+        metalsState = MetalsTrackerState(),
+        ratesMap = mapOf("USD" to 1.0, "EUR" to 0.95),
+        syncStatus = SyncStatus(isLive = true, isSyncing = false, isNetworkAvailable = true, lastUpdatedMillis = 1_700_864_000_000L),
+        displayLocale = Locale.US,
+        isDarkTheme = false,
+        categoryDisplayTitle = "",
+        tabTitle = "Global Currency",
+        chartDisplayTitle = "Historical Rate Trend",
+        liveLabel = "Live",
+        offlineLabel = "Offline",
+      )
+    assertTrue(fxPayload.hasChart)
+    assertTrue(fxPayload.textSummary.contains("USD"))
+    assertTrue(fxPayload.textSummary.contains("EUR"))
+    assertTrue(fxPayload.textSummary.contains("+5.56%"))
+  }
+
+  @Test
+  fun aiContextBuilder_formatsLiveSnapshotForCurrencyAndMetals() {
+    val label =
+      VertoAiContextBuilder.buildShortContextLabel(
+        activeTab = AppTab.METALS,
+        unitState = UnitConverterState(),
+        currencyState = CurrencyConverterState(),
+        metalsState = MetalsTrackerState(selectedMetal = MetalType.GOLD, selectedCountry = CountryMetalsCatalog.find("EG")),
+        displayLocale = Locale.US,
+      )
+    assertTrue(label.contains("Gold (XAU)"))
+    assertTrue(label.contains("EGP"))
+
+    val snapshot =
+      VertoAiContextBuilder.buildContextSnapshot(
+        activeTab = AppTab.METALS,
+        unitState = UnitConverterState(),
+        currencyState = CurrencyConverterState(),
+        metalsState = MetalsTrackerState(selectedMetal = MetalType.GOLD, selectedCountry = CountryMetalsCatalog.find("EG")),
+        ratesMap = mapOf("EGP" to 49.3),
+        syncStatus = SyncStatus(isLive = false, isSyncing = false, isNetworkAvailable = false, lastUpdatedMillis = 1_700_864_000_000L),
+        displayLocale = Locale.forLanguageTag("ar"),
+      )
+    assertTrue(snapshot.contains("Gold (XAU)"))
+    assertTrue(snapshot.contains("Offline"))
+    assertTrue(snapshot.contains("EGP"))
   }
 }

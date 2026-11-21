@@ -4,7 +4,7 @@
     <string name="tab_currency">Währung</string>
     <string name="tab_metals">Gold &amp; Silber</string>
     <string name="status_live">Live</string>
-    <string name="status_cached">Offline-Cache</string>
+    <string name="status_cached">Offline</string>
     <string name="status_syncing">Aktualisiere…</string>
     <string name="action_refresh">Kurse aktualisieren</string>
     <string name="action_language">Sprache</string>
@@ -120,4 +120,35 @@
     <string name="graph_unit_gold_coin">Goldmünze (8g)</string>
     <string name="graph_unit_silver_coin">Silbermünze (8g)</string>
     <string name="suffix_coin">Münze</string>
+
+    <string name="action_share">Teilen</string>
+    <string name="share_sheet_title">Teilen &amp; Exportieren</string>
+    <string name="share_chooser_title">Teilen über</string>
+    <string name="share_mode_chart">Trenddiagramm</string>
+    <string name="share_mode_summary">Zusammenfassung</string>
+    <string name="share_image_preview_desc">Vorschau der Exportgrafik</string>
+    <string name="share_text_preview_label">Textzusammenfassung</string>
+    <string name="share_as_text">Als Text teilen</string>
+    <string name="share_as_image">Als Bild teilen</string>
+    <string name="share_error_message">Freigabe konnte nicht geöffnet werden</string>
+
+    <string name="ai_fab_label">KI fragen</string>
+    <string name="ai_sheet_title">Verto KI-Analyst</string>
+    <string name="ai_welcome_title">Diskutieren, erklären &amp; prognostizieren</string>
+    <string name="ai_welcome_body">Fragen Sie nach aktuellen Umrechnungen, Wechselkurstreibern, Edelmetallreinheiten oder szenariobasierten Preisausblicken.</string>
+    <string name="ai_input_hint">Nach Preisen, Trends oder Umrechnungen fragen…</string>
+    <string name="ai_send">Senden</string>
+    <string name="ai_thinking">Analysiere…</string>
+    <string name="ai_retry">Erneut</string>
+    <string name="ai_offline_notice">Offline — bitte verbinden, um Verto KI zu fragen.</string>
+    <string name="ai_disclaimer">KI-Analysen dienen nur zur Information und sind keine Finanzberatung.</string>
+    <string name="ai_prompt_unit_explain">Formel erklären</string>
+    <string name="ai_prompt_unit_realworld">Praxisbeispiele</string>
+    <string name="ai_prompt_unit_compare">Einheiten vergleichen</string>
+    <string name="ai_prompt_fx_explain">Trend erklären</string>
+    <string name="ai_prompt_fx_predict">Kursprognose</string>
+    <string name="ai_prompt_fx_tips">Gebührentipps</string>
+    <string name="ai_prompt_metal_explain">Gold &amp; Silber erklären</string>
+    <string name="ai_prompt_metal_predict">Preisszenarien</string>
+    <string name="ai_prompt_metal_purity">Feingehalte vergleichen</string>
 </resources>

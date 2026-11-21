@@ -91,7 +91,7 @@ fun StatusPill(
     }
 
   Surface(
-    modifier = modifier,
+    modifier = modifier.testTag("status_pill"),
     shape = RoundedCornerShape(999.dp),
     color = dotColor.copy(alpha = 0.14f),
     border = BorderStroke(1.dp, dotColor.copy(alpha = 0.25f)),

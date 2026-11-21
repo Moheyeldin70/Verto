@@ -114,7 +114,11 @@ fun CurrencyConverterScreen(
   val outputAmount = inputAmount * unitRate
 
   Column(
-    modifier = modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
+    modifier =
+      modifier
+        .fillMaxSize()
+        .verticalScroll(rememberScrollState())
+        .padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 88.dp),
     verticalArrangement = Arrangement.spacedBy(16.dp),
   ) {
     if (!syncStatus.isLive && !syncStatus.isNetworkAvailable) {

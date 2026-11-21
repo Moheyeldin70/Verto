@@ -8,7 +8,7 @@
 
     <!-- Status & Top Bar -->
     <string name="status_live">Live</string>
-    <string name="status_cached">Offline Cache</string>
+    <string name="status_cached">Offline</string>
     <string name="status_syncing">Updating…</string>
     <string name="action_refresh">Refresh rates</string>
     <string name="action_language">Language</string>
@@ -138,4 +138,37 @@
     <string name="suffix_coin">coin</string>
     <string name="license_footer_title" translatable="false">MIT License</string>
     <string name="license_author_notice" translatable="false">Moheyeldin Emad · Nov 21, 2026 · contact.meldin@gmail.com</string>
+
+    <!-- Share & Export -->
+    <string name="action_share">Share</string>
+    <string name="share_sheet_title">Share &amp; Export</string>
+    <string name="share_chooser_title">Share via</string>
+    <string name="share_mode_chart">Trend Chart</string>
+    <string name="share_mode_summary">Summary Card</string>
+    <string name="share_image_preview_desc">Exportable summary image preview</string>
+    <string name="share_text_preview_label">Text Summary</string>
+    <string name="share_as_text">Share Text</string>
+    <string name="share_as_image">Share Image</string>
+    <string name="share_error_message">Unable to open share sheet</string>
+
+    <!-- Verto AI Analyst -->
+    <string name="ai_fab_label">Ask AI</string>
+    <string name="ai_sheet_title">Verto AI Analyst</string>
+    <string name="ai_welcome_title">Discuss, explain &amp; forecast</string>
+    <string name="ai_welcome_body">Ask about your current conversion, currency trend drivers, gold &amp; silver purities, or scenario-based price outlooks.</string>
+    <string name="ai_input_hint">Ask about prices, trends, or conversions…</string>
+    <string name="ai_send">Send</string>
+    <string name="ai_thinking">Analyzing…</string>
+    <string name="ai_retry">Retry</string>
+    <string name="ai_offline_notice">You appear offline — reconnect to ask Verto AI.</string>
+    <string name="ai_disclaimer">AI analysis &amp; forecasts are informational only, not financial advice.</string>
+    <string name="ai_prompt_unit_explain">Explain this unit formula</string>
+    <string name="ai_prompt_unit_realworld">Real-world examples</string>
+    <string name="ai_prompt_unit_compare">Compare nearby units</string>
+    <string name="ai_prompt_fx_explain">Explain this trend</string>
+    <string name="ai_prompt_fx_predict">Forecast outlook</string>
+    <string name="ai_prompt_fx_tips">Conversion fee tips</string>
+    <string name="ai_prompt_metal_explain">Explain gold &amp; silver move</string>
+    <string name="ai_prompt_metal_predict">Predict price scenarios</string>
+    <string name="ai_prompt_metal_purity">Compare purities &amp; value</string>
 </resources>

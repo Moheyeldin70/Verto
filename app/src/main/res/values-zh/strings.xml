@@ -8,7 +8,7 @@
 
     <!-- Status & Top Bar -->
     <string name="status_live">实时</string>
-    <string name="status_cached">离线缓存</string>
+    <string name="status_cached">离线</string>
     <string name="status_syncing">更新中…</string>
     <string name="action_refresh">刷新汇率</string>
     <string name="action_language">语言</string>
@@ -135,4 +135,35 @@
     <string name="graph_unit_gold_coin">金币 (8g)</string>
     <string name="graph_unit_silver_coin">银币 (8g)</string>
     <string name="suffix_coin">枚</string>
+
+    <string name="action_share">分享</string>
+    <string name="share_sheet_title">分享与导出</string>
+    <string name="share_chooser_title">分享至</string>
+    <string name="share_mode_chart">趋势图表</string>
+    <string name="share_mode_summary">摘要卡片</string>
+    <string name="share_image_preview_desc">导出图片预览</string>
+    <string name="share_text_preview_label">文本摘要</string>
+    <string name="share_as_text">分享文本</string>
+    <string name="share_as_image">分享图片</string>
+    <string name="share_error_message">无法打开分享菜单</string>
+
+    <string name="ai_fab_label">问 AI</string>
+    <string name="ai_sheet_title">Verto AI 分析师</string>
+    <string name="ai_welcome_title">讨论、解析与预测</string>
+    <string name="ai_welcome_body">咨询当前换算公式、汇率波动原因、金银纯度定价或基于历史趋势的价格情景预测。</string>
+    <string name="ai_input_hint">询问价格、趋势或换算问题…</string>
+    <string name="ai_send">发送</string>
+    <string name="ai_thinking">分析中…</string>
+    <string name="ai_retry">重试</string>
+    <string name="ai_offline_notice">当前离线 — 联网后即可向 Verto AI 提问。</string>
+    <string name="ai_disclaimer">AI 分析与预测仅供参考，不构成投资建议。</string>
+    <string name="ai_prompt_unit_explain">解释换算公式</string>
+    <string name="ai_prompt_unit_realworld">生活实例</string>
+    <string name="ai_prompt_unit_compare">对比其他单位</string>
+    <string name="ai_prompt_fx_explain">分析汇率趋势</string>
+    <string name="ai_prompt_fx_predict">走势展望</string>
+    <string name="ai_prompt_fx_tips">换汇建议</string>
+    <string name="ai_prompt_metal_explain">解析金银走势</string>
+    <string name="ai_prompt_metal_predict">价格情景预测</string>
+    <string name="ai_prompt_metal_purity">纯度与价值对比</string>
 </resources>
