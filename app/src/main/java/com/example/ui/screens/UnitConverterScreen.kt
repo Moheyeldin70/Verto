@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -23,14 +24,17 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowDropDown
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.ContentCopy
 import androidx.compose.material.icons.rounded.Functions
+import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -69,12 +73,14 @@ fun UnitConverterScreen(
   onSelectCategory: (UnitCategory) -> Unit,
   onSelectFromUnit: (UnitDef) -> Unit,
   onSelectToUnit: (UnitDef) -> Unit,
+  onSelectUnitWithCategory: (UnitDef, Boolean) -> Unit,
   onSwap: () -> Unit,
   onInputChange: (String) -> Unit,
   onShowMessage: (String) -> Unit,
   modifier: Modifier = Modifier,
 ) {
   var pickingForFrom by remember { mutableStateOf<Boolean?>(null) }
+  var pickingStartInAll by remember { mutableStateOf(false) }
   val unitsInCategory = remember(state.category) { UnitCatalog.unitsFor(state.category) }
   val clipboard = LocalClipboardManager.current
   val copiedMsg = stringResource(R.string.copied_feedback)
@@ -82,6 +88,49 @@ fun UnitConverterScreen(
   Column(
     modifier = modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(bottom = 88.dp),
   ) {
+    // Searchable global unit & category dropdown trigger
+    Surface(
+      onClick = {
+        pickingStartInAll = true
+        pickingForFrom = false
+      },
+      shape = RoundedCornerShape(14.dp),
+      color = MaterialTheme.colorScheme.surfaceContainer,
+      border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+      modifier =
+        Modifier
+          .fillMaxWidth()
+          .padding(horizontal = 16.dp, vertical = 4.dp)
+          .height(48.dp)
+          .testTag("unit_global_search_button"),
+    ) {
+      Row(
+        modifier = Modifier.fillMaxSize().padding(horizontal = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+      ) {
+        Icon(
+          imageVector = Icons.Rounded.Search,
+          contentDescription = null,
+          tint = MaterialTheme.colorScheme.primary,
+          modifier = Modifier.size(20.dp),
+        )
+        Text(
+          text = stringResource(R.string.find_any_unit_button),
+          style = MaterialTheme.typography.bodyMedium,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+          maxLines = 1,
+          overflow = TextOverflow.Ellipsis,
+          modifier = Modifier.weight(1f),
+        )
+        Icon(
+          imageVector = Icons.Rounded.ArrowDropDown,
+          contentDescription = null,
+          tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+      }
+    }
+
     // Category Chips
     LazyRow(
       contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
@@ -125,8 +174,14 @@ fun UnitConverterScreen(
           UnitInputOutputCard(
             state = state,
             onInputChange = onInputChange,
-            onPickFrom = { pickingForFrom = true },
-            onPickTo = { pickingForFrom = false },
+            onPickFrom = {
+              pickingStartInAll = false
+              pickingForFrom = true
+            },
+            onPickTo = {
+              pickingStartInAll = false
+              pickingForFrom = false
+            },
             onSwap = onSwap,
             onCopyOutput = {
               clipboard.setText(AnnotatedString(FormattingUtils.formatSmart(state.outputValue)))
@@ -150,8 +205,14 @@ fun UnitConverterScreen(
         UnitInputOutputCard(
           state = state,
           onInputChange = onInputChange,
-          onPickFrom = { pickingForFrom = true },
-          onPickTo = { pickingForFrom = false },
+          onPickFrom = {
+            pickingStartInAll = false
+            pickingForFrom = true
+          },
+          onPickTo = {
+            pickingStartInAll = false
+            pickingForFrom = false
+          },
           onSwap = onSwap,
           onCopyOutput = {
             clipboard.setText(AnnotatedString(FormattingUtils.formatSmart(state.outputValue)))
@@ -169,12 +230,22 @@ fun UnitConverterScreen(
 
   pickingForFrom?.let { isFrom ->
     UnitPickerBottomSheet(
-      units = unitsInCategory,
+      selectedCategory = state.category,
       selectedUnit = if (isFrom) state.fromUnit else state.toUnit,
+      startInAllCategories = pickingStartInAll,
       onSelect = { chosen ->
-        if (isFrom) onSelectFromUnit(chosen) else onSelectToUnit(chosen)
+        if (chosen.category != state.category) {
+          onSelectUnitWithCategory(chosen, isFrom)
+        } else if (isFrom) {
+          onSelectFromUnit(chosen)
+        } else {
+          onSelectToUnit(chosen)
+        }
       },
-      onDismiss = { pickingForFrom = null },
+      onDismiss = {
+        pickingForFrom = null
+        pickingStartInAll = false
+      },
     )
   }
 }
@@ -320,19 +391,28 @@ private fun UnitSelectorPill(
     onClick = onClick,
     shape = RoundedCornerShape(14.dp),
     color = MaterialTheme.colorScheme.surfaceVariant,
-    modifier = modifier.height(48.dp),
+    modifier = modifier.height(48.dp).widthIn(max = 152.dp),
   ) {
     Row(
       modifier = Modifier.padding(horizontal = 12.dp),
       verticalAlignment = Alignment.CenterVertically,
       horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-      Column {
+      Column(modifier = Modifier.weight(1f, fill = false)) {
         Text(
           text = unit.symbol,
           style = MaterialTheme.typography.titleMedium,
           fontWeight = FontWeight.Bold,
           color = MaterialTheme.colorScheme.onSurface,
+          maxLines = 1,
+          overflow = TextOverflow.Ellipsis,
+        )
+        Text(
+          text = unit.name,
+          style = MaterialTheme.typography.labelSmall,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+          maxLines = 1,
+          overflow = TextOverflow.Ellipsis,
         )
       }
       Icon(
@@ -350,6 +430,13 @@ private fun AllUnitsBreakdownCard(
   unitsInCategory: List<UnitDef>,
   onSelectTarget: (UnitDef) -> Unit,
 ) {
+  var filterQuery by remember(state.category) { mutableStateOf("") }
+  val filteredUnits =
+    remember(unitsInCategory, filterQuery, state.category) {
+      if (filterQuery.isBlank()) unitsInCategory
+      else UnitCatalog.searchUnits(query = filterQuery, categoryFilter = state.category)
+    }
+
   Card(
     shape = MaterialTheme.shapes.large,
     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -361,44 +448,70 @@ private fun AllUnitsBreakdownCard(
         style = MaterialTheme.typography.titleMedium,
       )
       Spacer(Modifier.height(10.dp))
-      unitsInCategory.forEachIndexed { idx, unit ->
-        val value = UnitCatalog.convert(state.inputValue, state.fromUnit, unit)
-        val isTarget = unit.id == state.toUnit.id
-        Row(
-          modifier =
-            Modifier
-              .fillMaxWidth()
-              .clip(RoundedCornerShape(10.dp))
-              .clickable { onSelectTarget(unit) }
-              .padding(horizontal = 8.dp, vertical = 10.dp),
-          horizontalArrangement = Arrangement.SpaceBetween,
-          verticalAlignment = Alignment.CenterVertically,
-        ) {
-          Column(modifier = Modifier.weight(1f)) {
+      OutlinedTextField(
+        value = filterQuery,
+        onValueChange = { filterQuery = it },
+        placeholder = { Text(stringResource(R.string.filter_units_hint)) },
+        leadingIcon = { Icon(Icons.Rounded.Search, contentDescription = null) },
+        trailingIcon = {
+          if (filterQuery.isNotEmpty()) {
+            IconButton(onClick = { filterQuery = "" }) {
+              Icon(Icons.Rounded.Close, contentDescription = stringResource(R.string.action_clear))
+            }
+          }
+        },
+        singleLine = true,
+        shape = RoundedCornerShape(12.dp),
+        modifier = Modifier.fillMaxWidth().testTag("unit_inline_filter_input"),
+      )
+      Spacer(Modifier.height(10.dp))
+      if (filteredUnits.isEmpty()) {
+        Text(
+          text = stringResource(R.string.no_results),
+          style = MaterialTheme.typography.bodyMedium,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+          modifier = Modifier.padding(vertical = 12.dp),
+        )
+      } else {
+        filteredUnits.forEachIndexed { idx, unit ->
+          val value = UnitCatalog.convert(state.inputValue, state.fromUnit, unit)
+          val isTarget = unit.id == state.toUnit.id
+          Row(
+            modifier =
+              Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(10.dp))
+                .clickable { onSelectTarget(unit) }
+                .padding(horizontal = 8.dp, vertical = 10.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+          ) {
+            Column(modifier = Modifier.weight(1f)) {
+              Text(
+                text = unit.name,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = if (isTarget) FontWeight.Bold else FontWeight.Medium,
+                color =
+                  if (isTarget) MaterialTheme.colorScheme.primary
+                  else MaterialTheme.colorScheme.onSurface,
+              )
+              Text(
+                text = unit.symbol,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+              )
+            }
             Text(
-              text = unit.name,
-              style = MaterialTheme.typography.bodyMedium,
-              fontWeight = if (isTarget) FontWeight.Bold else FontWeight.Medium,
+              text = "${FormattingUtils.formatSmart(value)} ${unit.symbol}",
+              style = NumericMediumStyle,
               color =
                 if (isTarget) MaterialTheme.colorScheme.primary
                 else MaterialTheme.colorScheme.onSurface,
             )
-            Text(
-              text = unit.symbol,
-              style = MaterialTheme.typography.bodySmall,
-              color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
           }
-          Text(
-            text = "${FormattingUtils.formatSmart(value)} ${unit.symbol}",
-            style = NumericMediumStyle,
-            color =
-              if (isTarget) MaterialTheme.colorScheme.primary
-              else MaterialTheme.colorScheme.onSurface,
-          )
-        }
-        if (idx < unitsInCategory.lastIndex) {
-          HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f))
+          if (idx < filteredUnits.lastIndex) {
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f))
+          }
         }
       }
     }

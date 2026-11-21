@@ -169,4 +169,15 @@
     <string name="ai_prompt_metal_explain">فسّر حركة الذهب والفضة</string>
     <string name="ai_prompt_metal_predict">توقع سيناريوهات الأسعار</string>
     <string name="ai_prompt_metal_purity">قارن العيارات والقيمة</string>
+
+    <!-- Searchable Unit & Currency Pickers / Filterable Lists -->
+    <string name="find_any_unit_button">ابحث عن أي وحدة أو فئة…</string>
+    <string name="filter_units_hint">تصفية الوحدات المكافئة…</string>
+    <string name="filter_all">الكل</string>
+    <string name="filter_popular">الشائعة</string>
+    <string name="filter_saved">المحفوظة</string>
+    <string name="region_mena">الشرق الأوسط وأفريقيا</string>
+    <string name="region_europe">أوروبا</string>
+    <string name="region_asia">آسيا والمحيط الهادئ</string>
+    <string name="region_americas">الأمريكتان</string>
 </resources>

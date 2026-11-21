@@ -613,6 +613,7 @@ private fun VertoMainContent(
                       onSelectCategory = viewModel::selectUnitCategory,
                       onSelectFromUnit = viewModel::setFromUnit,
                       onSelectToUnit = viewModel::setToUnit,
+                      onSelectUnitWithCategory = viewModel::selectUnitWithCategory,
                       onSwap = viewModel::swapUnits,
                       onInputChange = viewModel::updateUnitInput,
                       onShowMessage = showSnackbar,

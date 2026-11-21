@@ -151,4 +151,14 @@
     <string name="ai_prompt_metal_explain">Altın ve gümüşü açıkla</string>
     <string name="ai_prompt_metal_predict">Fiyat senaryoları</string>
     <string name="ai_prompt_metal_purity">Ayarları karşılaştır</string>
+
+    <string name="find_any_unit_button">Herhangi bir birim veya kategori ara…</string>
+    <string name="filter_units_hint">Birimleri filtrele…</string>
+    <string name="filter_all">Tümü</string>
+    <string name="filter_popular">Popüler</string>
+    <string name="filter_saved">Kayıtlı</string>
+    <string name="region_mena">Orta Doğu ve Afrika</string>
+    <string name="region_europe">Avrupa</string>
+    <string name="region_asia">Asya-Pasifik</string>
+    <string name="region_americas">Amerika</string>
 </resources>

@@ -2,6 +2,7 @@ package com.example.ui.screens
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,9 +11,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -21,17 +25,22 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowDropDown
 import androidx.compose.material.icons.rounded.BookmarkAdd
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.CloudOff
 import androidx.compose.material.icons.rounded.ContentCopy
 import androidx.compose.material.icons.rounded.DeleteOutline
+import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -102,6 +111,11 @@ fun CurrencyConverterScreen(
           .sorted()
           .map { code -> CurrencyInfo(code, code, code, "🌐", ratesMap[code] ?: 1.0) }
       CurrencyCatalog.all + extra
+    }
+
+  val savedCodes =
+    remember(savedConversions) {
+      savedConversions.flatMap { listOf(it.fromCode, it.toCode) }.toSet()
     }
 
   val fromInfo = remember(state.fromCode) { CurrencyCatalog.find(state.fromCode) }
@@ -188,10 +202,13 @@ fun CurrencyConverterScreen(
             onSelectRange = onSelectRange,
           )
           MajorWorldCurrenciesCard(
+            allCurrencies = allCurrencies,
             fromCode = state.fromCode,
+            toCode = state.toCode,
             inputAmount = inputAmount,
             fromRate = fromRate,
             ratesMap = ratesMap,
+            savedCodes = savedCodes,
             onSelectTarget = onSelectToCurrency,
           )
         }
@@ -224,10 +241,13 @@ fun CurrencyConverterScreen(
         onSelectRange = onSelectRange,
       )
       MajorWorldCurrenciesCard(
+        allCurrencies = allCurrencies,
         fromCode = state.fromCode,
+        toCode = state.toCode,
         inputAmount = inputAmount,
         fromRate = fromRate,
         ratesMap = ratesMap,
+        savedCodes = savedCodes,
         onSelectTarget = onSelectToCurrency,
       )
       SavedPairsCard(
@@ -242,6 +262,9 @@ fun CurrencyConverterScreen(
     CurrencyPickerBottomSheet(
       currencies = allCurrencies,
       selectedCode = if (isFrom) state.fromCode else state.toCode,
+      ratesMap = ratesMap,
+      baseCurrencyCode = state.fromCode,
+      savedCodes = savedCodes,
       onSelect = { chosen ->
         if (isFrom) onSelectFromCurrency(chosen.code) else onSelectToCurrency(chosen.code)
       },
@@ -514,16 +537,48 @@ private fun CurrencyChartCard(
 
 @Composable
 private fun MajorWorldCurrenciesCard(
+  allCurrencies: List<CurrencyInfo>,
   fromCode: String,
+  toCode: String,
   inputAmount: Double,
   fromRate: Double,
   ratesMap: Map<String, Double>,
+  savedCodes: Set<String>,
   onSelectTarget: (String) -> Unit,
 ) {
-  val list =
-    remember(fromCode) {
-      CurrencyCatalog.popularCodes.filter { it != fromCode }.take(8).map { CurrencyCatalog.find(it) }
+  var inlineQuery by remember { mutableStateOf("") }
+  var selectedRegion by remember { mutableStateOf(CurrencyCatalog.FilterRegion.POPULAR) }
+  var userPinnedRegion by remember { mutableStateOf(false) }
+
+  val effectiveRegion =
+    if (inlineQuery.isNotBlank() && !userPinnedRegion) CurrencyCatalog.FilterRegion.ALL
+    else selectedRegion
+
+  val displayed =
+    remember(allCurrencies, inlineQuery, effectiveRegion, savedCodes, fromCode) {
+      CurrencyCatalog.filterCurrencies(
+        currencies = allCurrencies,
+        query = inlineQuery,
+        region = effectiveRegion,
+        savedCodes = savedCodes,
+      ).filter { inlineQuery.isNotBlank() || it.code != fromCode }
     }
+
+  val regionChips =
+    remember(savedCodes) {
+      buildList {
+        add(CurrencyCatalog.FilterRegion.POPULAR to R.string.filter_popular)
+        add(CurrencyCatalog.FilterRegion.ALL to R.string.filter_all)
+        if (savedCodes.isNotEmpty()) {
+          add(CurrencyCatalog.FilterRegion.SAVED to R.string.filter_saved)
+        }
+        add(CurrencyCatalog.FilterRegion.MENA to R.string.region_mena)
+        add(CurrencyCatalog.FilterRegion.EUROPE to R.string.region_europe)
+        add(CurrencyCatalog.FilterRegion.ASIA_PACIFIC to R.string.region_asia)
+        add(CurrencyCatalog.FilterRegion.AMERICAS to R.string.region_americas)
+      }
+    }
+
   Card(
     shape = MaterialTheme.shapes.large,
     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -535,48 +590,142 @@ private fun MajorWorldCurrenciesCard(
         style = MaterialTheme.typography.titleMedium,
       )
       Spacer(Modifier.height(10.dp))
-      list.forEachIndexed { idx, info ->
-        val rate = ratesMap[info.code] ?: info.fallbackRateFromUsd
-        val converted = if (fromRate > 0.0) inputAmount * (rate / fromRate) else 0.0
-        Row(
-          modifier =
-            Modifier
-              .fillMaxWidth()
-              .clip(RoundedCornerShape(10.dp))
-              .clickable { onSelectTarget(info.code) }
-              .padding(horizontal = 8.dp, vertical = 10.dp),
-          verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-          Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
-            Text(text = info.flag, style = MaterialTheme.typography.titleLarge)
-            Spacer(Modifier.width(10.dp))
-            Column {
-              Text(
-                text = info.code,
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold,
-              )
-              Text(
-                text = info.name,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-              )
+      OutlinedTextField(
+        value = inlineQuery,
+        onValueChange = { inlineQuery = it },
+        placeholder = { Text(stringResource(R.string.search_currencies)) },
+        leadingIcon = { Icon(Icons.Rounded.Search, contentDescription = null) },
+        trailingIcon = {
+          if (inlineQuery.isNotEmpty()) {
+            IconButton(onClick = { inlineQuery = "" }) {
+              Icon(Icons.Rounded.Close, contentDescription = stringResource(R.string.action_clear))
             }
           }
-          Text(
-            text = "${FormattingUtils.formatMoney(converted)} ${info.symbol}",
-            style = NumericMediumStyle,
-            color = MaterialTheme.colorScheme.onSurface,
+        },
+        singleLine = true,
+        shape = RoundedCornerShape(12.dp),
+        modifier = Modifier.fillMaxWidth().testTag("currency_inline_filter_input"),
+      )
+      Spacer(Modifier.height(8.dp))
+      Row(
+        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+      ) {
+        regionChips.forEach { (region, labelRes) ->
+          val active = effectiveRegion == region
+          FilterChip(
+            selected = active,
+            onClick = {
+              selectedRegion = region
+              userPinnedRegion = true
+            },
+            label = { Text(stringResource(labelRes), maxLines = 1) },
+            colors =
+              FilterChipDefaults.filterChipColors(
+                selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                selectedLabelColor = MaterialTheme.colorScheme.primary,
+              ),
+            modifier =
+              Modifier
+                .heightIn(min = 40.dp)
+                .testTag("currency_inline_filter_${region.name.lowercase()}"),
           )
         }
-        if (idx < list.lastIndex) {
-          HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f))
+      }
+      Spacer(Modifier.height(8.dp))
+
+      if (displayed.isEmpty()) {
+        Text(
+          text = stringResource(R.string.no_results),
+          style = MaterialTheme.typography.bodyMedium,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+          modifier = Modifier.padding(vertical = 12.dp),
+        )
+      } else if (displayed.size > 12) {
+        LazyColumn(modifier = Modifier.fillMaxWidth().heightIn(max = 380.dp)) {
+          itemsIndexed(displayed, key = { _, item -> item.code }) { idx, info ->
+            CurrencyBreakdownRow(
+              info = info,
+              isTarget = info.code == toCode,
+              inputAmount = inputAmount,
+              fromRate = fromRate,
+              ratesMap = ratesMap,
+              showDivider = idx < displayed.lastIndex,
+              onSelect = { onSelectTarget(info.code) },
+            )
+          }
+        }
+      } else {
+        displayed.forEachIndexed { idx, info ->
+          CurrencyBreakdownRow(
+            info = info,
+            isTarget = info.code == toCode,
+            inputAmount = inputAmount,
+            fromRate = fromRate,
+            ratesMap = ratesMap,
+            showDivider = idx < displayed.lastIndex,
+            onSelect = { onSelectTarget(info.code) },
+          )
         }
       }
     }
+  }
+}
+
+@Composable
+private fun CurrencyBreakdownRow(
+  info: CurrencyInfo,
+  isTarget: Boolean,
+  inputAmount: Double,
+  fromRate: Double,
+  ratesMap: Map<String, Double>,
+  showDivider: Boolean,
+  onSelect: () -> Unit,
+) {
+  val rate = ratesMap[info.code] ?: info.fallbackRateFromUsd
+  val converted = if (fromRate > 0.0) inputAmount * (rate / fromRate) else 0.0
+  Row(
+    modifier =
+      Modifier
+        .fillMaxWidth()
+        .heightIn(min = 48.dp)
+        .clip(RoundedCornerShape(10.dp))
+        .clickable(onClick = onSelect)
+        .padding(horizontal = 8.dp, vertical = 10.dp),
+    verticalAlignment = Alignment.CenterVertically,
+    horizontalArrangement = Arrangement.SpaceBetween,
+  ) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+      Text(text = info.flag, style = MaterialTheme.typography.titleLarge)
+      Spacer(Modifier.width(10.dp))
+      Column {
+        Text(
+          text = info.code,
+          style = MaterialTheme.typography.titleSmall,
+          fontWeight = FontWeight.Bold,
+          color =
+            if (isTarget) MaterialTheme.colorScheme.primary
+            else MaterialTheme.colorScheme.onSurface,
+        )
+        Text(
+          text = info.name,
+          style = MaterialTheme.typography.bodySmall,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+          maxLines = 1,
+          overflow = TextOverflow.Ellipsis,
+        )
+      }
+    }
+    Text(
+      text = "${FormattingUtils.formatMoney(converted)} ${info.symbol}",
+      style = NumericMediumStyle,
+      color =
+        if (isTarget) MaterialTheme.colorScheme.primary
+        else MaterialTheme.colorScheme.onSurface,
+    )
+  }
+  if (showDivider) {
+    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f))
   }
 }
 

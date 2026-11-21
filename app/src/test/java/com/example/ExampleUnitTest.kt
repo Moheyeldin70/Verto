@@ -234,4 +234,67 @@ class ExampleUnitTest {
     assertTrue(snapshot.contains("Offline"))
     assertTrue(snapshot.contains("EGP"))
   }
+
+  @Test
+  fun unitCatalog_searchUnits_supportsExactPrefixAndCrossCategory() {
+    val allTemp = UnitCatalog.searchUnits("fahrenheit", categoryFilter = null)
+    assertTrue(allTemp.isNotEmpty())
+    assertEquals("f", allTemp.first().id)
+
+    val exactSymbol = UnitCatalog.searchUnits("kw", categoryFilter = null)
+    assertEquals("kw", exactSymbol.first().id)
+    assertEquals(UnitCategory.POWER, exactSymbol.first().category)
+
+    val scoped = UnitCatalog.searchUnits("fahrenheit", categoryFilter = UnitCategory.LENGTH)
+    assertTrue(scoped.isEmpty())
+
+    val catMatch = UnitCatalog.searchUnits("temperature", categoryFilter = null)
+    assertTrue(catMatch.any { it.category == UnitCategory.TEMPERATURE })
+  }
+
+  @Test
+  fun currencyCatalog_filterCurrencies_filtersByQueryRegionAndSaved() {
+    val exactCode =
+      CurrencyCatalog.filterCurrencies(
+        currencies = CurrencyCatalog.all,
+        query = "egp",
+        region = CurrencyCatalog.FilterRegion.ALL,
+      )
+    assertEquals("EGP", exactCode.first().code)
+
+    val menaList =
+      CurrencyCatalog.filterCurrencies(
+        currencies = CurrencyCatalog.all,
+        query = "",
+        region = CurrencyCatalog.FilterRegion.MENA,
+      )
+    assertTrue(menaList.any { it.code == "SAR" })
+    assertTrue(menaList.any { it.code == "EGP" })
+    assertFalse(menaList.any { it.code == "JPY" })
+
+    val europeEur =
+      CurrencyCatalog.filterCurrencies(
+        currencies = CurrencyCatalog.all,
+        query = "swiss",
+        region = CurrencyCatalog.FilterRegion.EUROPE,
+      )
+    assertEquals(listOf("CHF"), europeEur.map { it.code })
+
+    val savedOnly =
+      CurrencyCatalog.filterCurrencies(
+        currencies = CurrencyCatalog.all,
+        query = "",
+        region = CurrencyCatalog.FilterRegion.SAVED,
+        savedCodes = setOf("USD", "EGP"),
+      )
+    assertEquals(setOf("USD", "EGP"), savedOnly.map { it.code }.toSet())
+
+    val popularOnly =
+      CurrencyCatalog.filterCurrencies(
+        currencies = CurrencyCatalog.all,
+        query = "",
+        region = CurrencyCatalog.FilterRegion.POPULAR,
+      )
+    assertEquals(CurrencyCatalog.popularCodes.size, popularOnly.size)
+  }
 }

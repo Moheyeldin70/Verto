@@ -258,4 +258,33 @@ object UnitCatalog {
     val oneUnit = convert(1.0, from, to)
     return "1 ${from.symbol} = ${FormattingUtils.formatSmart(oneUnit)} ${to.symbol}"
   }
+
+  fun searchUnits(
+    query: String,
+    categoryFilter: UnitCategory? = null,
+    categoryLabelLookup: (UnitCategory) -> String = { it.name },
+  ): List<UnitDef> {
+    val baseList = if (categoryFilter != null) unitsFor(categoryFilter) else units
+    val trimmed = query.trim().lowercase()
+    if (trimmed.isEmpty()) return baseList
+
+    return baseList
+      .mapNotNull { unit ->
+        val catLabel = categoryLabelLookup(unit.category).lowercase()
+        val sym = unit.symbol.lowercase()
+        val name = unit.name.lowercase()
+        val id = unit.id.lowercase()
+        val score =
+          when {
+            sym == trimmed || id == trimmed -> 0
+            name.startsWith(trimmed) || sym.startsWith(trimmed) -> 1
+            name.contains(trimmed) || sym.contains(trimmed) -> 2
+            catLabel.contains(trimmed) || unit.category.name.lowercase().contains(trimmed) -> 3
+            else -> return@mapNotNull null
+          }
+        score to unit
+      }
+      .sortedBy { it.first }
+      .map { it.second }
+  }
 }

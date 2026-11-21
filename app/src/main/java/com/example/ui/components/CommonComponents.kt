@@ -33,6 +33,8 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -64,8 +66,12 @@ import com.example.data.local.ThemeMode
 import com.example.data.repository.ChartRange
 import com.example.domain.CountryMarket
 import com.example.domain.CountryMetalsCatalog
+import com.example.domain.CurrencyCatalog
 import com.example.domain.CurrencyInfo
+import com.example.domain.FormattingUtils
 import com.example.domain.MeasurementLocalePreference
+import com.example.domain.UnitCatalog
+import com.example.domain.UnitCategory
 import com.example.domain.UnitDef
 import com.example.ui.theme.LocalFinancialColors
 import java.util.Locale
@@ -183,19 +189,30 @@ fun ChartRangeSelector(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UnitPickerBottomSheet(
-  units: List<UnitDef>,
+  selectedCategory: UnitCategory,
   selectedUnit: UnitDef,
+  startInAllCategories: Boolean = false,
   onSelect: (UnitDef) -> Unit,
   onDismiss: () -> Unit,
 ) {
   var query by remember { mutableStateOf("") }
+  var selectedFilterCategory by
+    remember(selectedCategory, startInAllCategories) {
+      mutableStateOf<UnitCategory?>(if (startInAllCategories) null else selectedCategory)
+    }
+  var userPinnedCategory by remember(startInAllCategories) { mutableStateOf(false) }
+
+  val categoryLabels = UnitCategory.entries.associateWith { stringResource(it.labelRes) }
+  val activeCategoryFilter =
+    if (query.isNotBlank() && !userPinnedCategory) null else selectedFilterCategory
+
   val filtered =
-    remember(units, query) {
-      if (query.isBlank()) units
-      else {
-        val q = query.trim().lowercase()
-        units.filter { it.name.lowercase().contains(q) || it.symbol.lowercase().contains(q) }
-      }
+    remember(query, activeCategoryFilter, categoryLabels) {
+      UnitCatalog.searchUnits(
+        query = query,
+        categoryFilter = activeCategoryFilter,
+        categoryLabelLookup = { cat -> categoryLabels[cat] ?: cat.name },
+      )
     }
 
   ModalBottomSheet(
@@ -222,9 +239,48 @@ fun UnitPickerBottomSheet(
         },
         singleLine = true,
         shape = RoundedCornerShape(14.dp),
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().testTag("unit_search_input"),
       )
-      Spacer(Modifier.height(12.dp))
+      Spacer(Modifier.height(10.dp))
+      Row(
+        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+      ) {
+        val allSelected = activeCategoryFilter == null
+        FilterChip(
+          selected = allSelected,
+          onClick = {
+            selectedFilterCategory = null
+            userPinnedCategory = true
+          },
+          label = { Text(stringResource(R.string.filter_all), maxLines = 1) },
+          colors =
+            FilterChipDefaults.filterChipColors(
+              selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+              selectedLabelColor = MaterialTheme.colorScheme.primary,
+            ),
+          modifier = Modifier.heightIn(min = 40.dp).testTag("unit_filter_all"),
+        )
+        UnitCategory.entries.forEach { cat ->
+          val catSelected = activeCategoryFilter == cat
+          FilterChip(
+            selected = catSelected,
+            onClick = {
+              selectedFilterCategory = cat
+              userPinnedCategory = true
+            },
+            label = { Text(categoryLabels[cat] ?: cat.name, maxLines = 1) },
+            colors =
+              FilterChipDefaults.filterChipColors(
+                selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                selectedLabelColor = MaterialTheme.colorScheme.primary,
+              ),
+            modifier =
+              Modifier.heightIn(min = 40.dp).testTag("unit_filter_${cat.name.lowercase()}"),
+          )
+        }
+      }
+      Spacer(Modifier.height(8.dp))
       LazyColumn(modifier = Modifier.fillMaxWidth().heightIn(max = 420.dp)) {
         if (filtered.isEmpty()) {
           item {
@@ -242,16 +298,20 @@ fun UnitPickerBottomSheet(
               modifier =
                 Modifier
                   .fillMaxWidth()
+                  .heightIn(min = 48.dp)
                   .clip(RoundedCornerShape(12.dp))
                   .clickable {
                     onSelect(unit)
                     onDismiss()
                   }
-                  .padding(horizontal = 12.dp, vertical = 14.dp),
+                  .padding(horizontal = 12.dp, vertical = 12.dp),
               verticalAlignment = Alignment.CenterVertically,
               horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-              Row(verticalAlignment = Alignment.CenterVertically) {
+              Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.weight(1f),
+              ) {
                 Surface(
                   shape = RoundedCornerShape(8.dp),
                   color =
@@ -268,11 +328,22 @@ fun UnitPickerBottomSheet(
                   )
                 }
                 Spacer(Modifier.width(12.dp))
-                Text(
-                  text = unit.name,
-                  style = MaterialTheme.typography.bodyLarge,
-                  fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-                )
+                Column(modifier = Modifier.weight(1f)) {
+                  Text(
+                    text = unit.name,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                  )
+                  if (activeCategoryFilter == null) {
+                    Text(
+                      text = categoryLabels[unit.category] ?: unit.category.name,
+                      style = MaterialTheme.typography.labelSmall,
+                      color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                  }
+                }
               }
               if (isSelected) {
                 Icon(
@@ -296,20 +367,42 @@ fun UnitPickerBottomSheet(
 fun CurrencyPickerBottomSheet(
   currencies: List<CurrencyInfo>,
   selectedCode: String,
+  ratesMap: Map<String, Double> = emptyMap(),
+  baseCurrencyCode: String = "USD",
+  savedCodes: Set<String> = emptySet(),
   onSelect: (CurrencyInfo) -> Unit,
   onDismiss: () -> Unit,
 ) {
   var query by remember { mutableStateOf("") }
+  var selectedRegion by remember { mutableStateOf(CurrencyCatalog.FilterRegion.ALL) }
+
   val filtered =
-    remember(currencies, query) {
-      if (query.isBlank()) currencies
-      else {
-        val q = query.trim().lowercase()
-        currencies.filter {
-          it.code.lowercase().contains(q) ||
-            it.name.lowercase().contains(q) ||
-            it.symbol.lowercase().contains(q)
+    remember(currencies, query, selectedRegion, savedCodes) {
+      CurrencyCatalog.filterCurrencies(
+        currencies = currencies,
+        query = query,
+        region = selectedRegion,
+        savedCodes = savedCodes,
+      )
+    }
+
+  val baseRate =
+    remember(ratesMap, baseCurrencyCode) {
+      ratesMap[baseCurrencyCode] ?: CurrencyCatalog.find(baseCurrencyCode).fallbackRateFromUsd
+    }
+
+  val regionFilters =
+    remember(savedCodes) {
+      buildList {
+        add(CurrencyCatalog.FilterRegion.ALL to R.string.filter_all)
+        add(CurrencyCatalog.FilterRegion.POPULAR to R.string.filter_popular)
+        if (savedCodes.isNotEmpty()) {
+          add(CurrencyCatalog.FilterRegion.SAVED to R.string.filter_saved)
         }
+        add(CurrencyCatalog.FilterRegion.MENA to R.string.region_mena)
+        add(CurrencyCatalog.FilterRegion.EUROPE to R.string.region_europe)
+        add(CurrencyCatalog.FilterRegion.ASIA_PACIFIC to R.string.region_asia)
+        add(CurrencyCatalog.FilterRegion.AMERICAS to R.string.region_americas)
       }
     }
 
@@ -339,7 +432,30 @@ fun CurrencyPickerBottomSheet(
         shape = RoundedCornerShape(14.dp),
         modifier = Modifier.fillMaxWidth().testTag("currency_search_input"),
       )
-      Spacer(Modifier.height(12.dp))
+      Spacer(Modifier.height(10.dp))
+      Row(
+        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+      ) {
+        regionFilters.forEach { (region, labelRes) ->
+          val active = selectedRegion == region
+          FilterChip(
+            selected = active,
+            onClick = { selectedRegion = region },
+            label = { Text(stringResource(labelRes), maxLines = 1) },
+            colors =
+              FilterChipDefaults.filterChipColors(
+                selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                selectedLabelColor = MaterialTheme.colorScheme.primary,
+              ),
+            modifier =
+              Modifier
+                .heightIn(min = 40.dp)
+                .testTag("currency_filter_${region.name.lowercase()}"),
+          )
+        }
+      }
+      Spacer(Modifier.height(8.dp))
       LazyColumn(modifier = Modifier.fillMaxWidth().heightIn(max = 460.dp)) {
         if (filtered.isEmpty()) {
           item {
@@ -353,10 +469,13 @@ fun CurrencyPickerBottomSheet(
         } else {
           items(filtered, key = { it.code }) { item ->
             val isSelected = item.code == selectedCode
+            val targetRate = ratesMap[item.code] ?: item.fallbackRateFromUsd
+            val relativeRate = if (baseRate > 0.0) targetRate / baseRate else item.fallbackRateFromUsd
             Row(
               modifier =
                 Modifier
                   .fillMaxWidth()
+                  .heightIn(min = 48.dp)
                   .clip(RoundedCornerShape(12.dp))
                   .clickable {
                     onSelect(item)
@@ -382,6 +501,14 @@ fun CurrencyPickerBottomSheet(
                   color = MaterialTheme.colorScheme.onSurfaceVariant,
                   maxLines = 1,
                   overflow = TextOverflow.Ellipsis,
+                )
+              }
+              if (ratesMap.isNotEmpty() && item.code != baseCurrencyCode) {
+                Text(
+                  text = "1 $baseCurrencyCode = ${FormattingUtils.formatRate(relativeRate)}",
+                  style = MaterialTheme.typography.labelSmall,
+                  color = MaterialTheme.colorScheme.onSurfaceVariant,
+                  modifier = Modifier.padding(end = 8.dp),
                 )
               }
               if (isSelected) {

@@ -166,4 +166,14 @@
     <string name="ai_prompt_metal_explain">金・銀の動きを解説</string>
     <string name="ai_prompt_metal_predict">価格シナリオ予測</string>
     <string name="ai_prompt_metal_purity">純度別の比較</string>
+
+    <string name="find_any_unit_button">すべての単位・カテゴリから検索…</string>
+    <string name="filter_units_hint">換算リストを絞り込む…</string>
+    <string name="filter_all">すべて</string>
+    <string name="filter_popular">主要</string>
+    <string name="filter_saved">保存済み</string>
+    <string name="region_mena">中東・アフリカ</string>
+    <string name="region_europe">欧州</string>
+    <string name="region_asia">アジア・太平洋</string>
+    <string name="region_americas">米州</string>
 </resources>

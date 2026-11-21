@@ -179,6 +179,87 @@ object CurrencyCatalog {
 
   val popularCodes = listOf("USD", "EUR", "GBP", "JPY", "CNY", "SAR", "AED", "EGP", "INR", "CHF", "CAD", "AUD")
 
+  private val menaCodes =
+    setOf(
+      "SAR", "AED", "EGP", "KWD", "BHD", "OMR", "QAR", "JOD", "IQD", "LBP", "SYP", "YER",
+      "MAD", "DZD", "TND", "LYD", "SDG", "ILS", "IRR", "MRU", "SOS", "DJF", "ZAR", "NGN",
+      "KES", "GHS", "ETB", "TZS", "UGX", "RWF", "ZMW", "MAD", "NAD", "BWP", "MUR", "SCR",
+      "AOA", "CDF", "XAF", "XOF", "MGA", "MWK", "MZN", "SZL", "LSL", "GMD", "GNF", "LRD",
+      "SLE", "SSP", "STN", "CVE", "KMF", "BIF", "ERN", "SHP", "ZWL",
+    )
+
+  private val europeCodes =
+    setOf(
+      "EUR", "GBP", "CHF", "SEK", "NOK", "DKK", "PLN", "TRY", "RUB", "UAH", "CZK", "HUF",
+      "RON", "RSD", "BGN", "ISK", "BAM", "MKD", "MDL", "ALL", "BYN", "GEL", "AMD", "AZN",
+      "FOK", "GGP", "GIP", "IMP", "JEP", "HRK",
+    )
+
+  private val americasCodes =
+    setOf(
+      "USD", "CAD", "BRL", "MXN", "ARS", "CLP", "COP", "PEN", "UYU", "PYG", "BOB", "CRC",
+      "DOP", "GTQ", "HNL", "NIO", "PAB", "VES", "JMD", "TTD", "BSD", "BBD", "BZD", "KYD",
+      "GYD", "SRD", "HTG", "CUP", "XCD", "ANG", "AWG", "BMD", "FKP",
+    )
+
+  private val asiaPacificCodes =
+    setOf(
+      "JPY", "CNY", "INR", "AUD", "NZD", "KRW", "SGD", "HKD", "TWD", "IDR", "MYR", "THB",
+      "VND", "PHP", "PKR", "BDT", "LKR", "NPR", "KZT", "UZS", "AZN", "AFN", "MMK", "KHR",
+      "LAK", "MNT", "MOP", "BND", "BTN", "MVR", "KGS", "TJS", "TMT", "KPW", "FJD", "PGK",
+      "SBD", "TOP", "VUV", "WST", "KID", "TVD", "XPF",
+    )
+
+  enum class FilterRegion {
+    ALL,
+    POPULAR,
+    SAVED,
+    MENA,
+    EUROPE,
+    ASIA_PACIFIC,
+    AMERICAS,
+  }
+
+  fun filterCurrencies(
+    currencies: List<CurrencyInfo>,
+    query: String,
+    region: FilterRegion,
+    savedCodes: Set<String> = emptySet(),
+  ): List<CurrencyInfo> {
+    val popularSet = popularCodes.toSet()
+    val regional =
+      when (region) {
+        FilterRegion.ALL -> currencies
+        FilterRegion.POPULAR -> currencies.filter { it.code in popularSet }
+        FilterRegion.SAVED -> currencies.filter { it.code in savedCodes }
+        FilterRegion.MENA -> currencies.filter { it.code in menaCodes }
+        FilterRegion.EUROPE -> currencies.filter { it.code in europeCodes }
+        FilterRegion.ASIA_PACIFIC -> currencies.filter { it.code in asiaPacificCodes }
+        FilterRegion.AMERICAS -> currencies.filter { it.code in americasCodes }
+      }
+
+    val q = query.trim().lowercase()
+    if (q.isEmpty()) return regional
+
+    return regional
+      .mapNotNull { item ->
+        val code = item.code.lowercase()
+        val name = item.name.lowercase()
+        val symbol = item.symbol.lowercase()
+        val score =
+          when {
+            code == q -> 0
+            code.startsWith(q) -> 1
+            name.startsWith(q) -> 2
+            code.contains(q) || name.contains(q) || symbol.contains(q) -> 3
+            else -> return@mapNotNull null
+          }
+        score to item
+      }
+      .sortedBy { it.first }
+      .map { it.second }
+  }
+
   fun find(code: String): CurrencyInfo =
     byCode[code.uppercase()]
       ?: CurrencyInfo(

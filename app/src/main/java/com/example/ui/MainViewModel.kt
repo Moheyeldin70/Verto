@@ -150,7 +150,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
   private var metalPrefetchJob: Job? = null
   private var aiStreamJob: Job? = null
   private val aiMsgIdGenerator = AtomicLong(1L)
-  private val aiClient by lazy { VertoAiClient() }
+  private val aiClient by lazy { VertoAiClient(getApplication()) }
 
   private val _aiState = MutableStateFlow(AiAssistantState())
   val aiState: StateFlow<AiAssistantState> = _aiState.asStateFlow()
@@ -441,6 +441,40 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     _unitState.update { it.copy(toUnit = unit) }
     viewModelScope.launch {
       prefsRepo.setUnitSelection(current.category.name, current.fromUnit.id, unit.id, isManual = true)
+    }
+  }
+
+  fun selectUnitWithCategory(
+    unit: UnitDef,
+    isFrom: Boolean,
+  ) {
+    val current = _unitState.value
+    if (unit.category == current.category) {
+      if (isFrom) setFromUnit(unit) else setToUnit(unit)
+      return
+    }
+    val sys = resolveActiveMeasurementSystem()
+    val defaultPair = LocationLocaleResolver.defaultUnitPair(unit.category, sys)
+    val unitsInCat = UnitCatalog.unitsFor(unit.category)
+    val partner =
+      if (isFrom) {
+        if (defaultPair.second.id != unit.id) defaultPair.second
+        else unitsInCat.firstOrNull { it.id != unit.id } ?: unit
+      } else {
+        if (defaultPair.first.id != unit.id) defaultPair.first
+        else unitsInCat.firstOrNull { it.id != unit.id } ?: unit
+      }
+    val newFrom = if (isFrom) unit else partner
+    val newTo = if (isFrom) partner else unit
+    _unitState.update {
+      it.copy(
+        category = unit.category,
+        fromUnit = newFrom,
+        toUnit = newTo,
+      )
+    }
+    viewModelScope.launch {
+      prefsRepo.setUnitSelection(unit.category.name, newFrom.id, newTo.id, isManual = true)
     }
   }
 

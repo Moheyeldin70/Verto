@@ -171,4 +171,15 @@
     <string name="ai_prompt_metal_explain">Explain gold &amp; silver move</string>
     <string name="ai_prompt_metal_predict">Predict price scenarios</string>
     <string name="ai_prompt_metal_purity">Compare purities &amp; value</string>
+
+    <!-- Searchable Unit & Currency Pickers / Filterable Lists -->
+    <string name="find_any_unit_button">Search any unit or category…</string>
+    <string name="filter_units_hint">Filter equivalent units…</string>
+    <string name="filter_all">All</string>
+    <string name="filter_popular">Popular</string>
+    <string name="filter_saved">Saved</string>
+    <string name="region_mena">MENA &amp; Africa</string>
+    <string name="region_europe">Europe</string>
+    <string name="region_asia">Asia &amp; Pacific</string>
+    <string name="region_americas">Americas</string>
 </resources>

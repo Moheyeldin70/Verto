@@ -151,4 +151,14 @@
     <string name="ai_prompt_metal_explain">Gold &amp; Silber erklären</string>
     <string name="ai_prompt_metal_predict">Preisszenarien</string>
     <string name="ai_prompt_metal_purity">Feingehalte vergleichen</string>
+
+    <string name="find_any_unit_button">Einheit oder Kategorie suchen…</string>
+    <string name="filter_units_hint">Einheiten filtern…</string>
+    <string name="filter_all">Alle</string>
+    <string name="filter_popular">Beliebt</string>
+    <string name="filter_saved">Gespeichert</string>
+    <string name="region_mena">Nahost &amp; Afrika</string>
+    <string name="region_europe">Europa</string>
+    <string name="region_asia">Asien &amp; Pazifik</string>
+    <string name="region_americas">Amerika</string>
 </resources>

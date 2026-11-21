@@ -151,4 +151,14 @@
     <string name="ai_prompt_metal_explain">금·은 시세 설명</string>
     <string name="ai_prompt_metal_predict">가격 시나리오 예측</string>
     <string name="ai_prompt_metal_purity">순도별 비교</string>
+
+    <string name="find_any_unit_button">모든 단위 또는 카테고리 검색…</string>
+    <string name="filter_units_hint">환산 단위 필터…</string>
+    <string name="filter_all">전체</string>
+    <string name="filter_popular">인기</string>
+    <string name="filter_saved">저장됨</string>
+    <string name="region_mena">중동·아프리카</string>
+    <string name="region_europe">유럽</string>
+    <string name="region_asia">아시아·태평양</string>
+    <string name="region_americas">아메리카</string>
 </resources>

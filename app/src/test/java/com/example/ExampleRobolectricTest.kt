@@ -49,6 +49,15 @@ class ExampleRobolectricTest {
       assertTrue(localizedRes.getString(R.string.share_sheet_title).isNotBlank())
       assertTrue(localizedRes.getString(R.string.ai_sheet_title).isNotBlank())
       assertTrue(localizedRes.getString(R.string.ai_prompt_fx_predict).isNotBlank())
+      assertTrue(localizedRes.getString(R.string.find_any_unit_button).isNotBlank())
+      assertTrue(localizedRes.getString(R.string.filter_units_hint).isNotBlank())
+      assertTrue(localizedRes.getString(R.string.filter_all).isNotBlank())
+      assertTrue(localizedRes.getString(R.string.filter_popular).isNotBlank())
+      assertTrue(localizedRes.getString(R.string.filter_saved).isNotBlank())
+      assertTrue(localizedRes.getString(R.string.region_mena).isNotBlank())
+      assertTrue(localizedRes.getString(R.string.region_europe).isNotBlank())
+      assertTrue(localizedRes.getString(R.string.region_asia).isNotBlank())
+      assertTrue(localizedRes.getString(R.string.region_americas).isNotBlank())
     }
   }
 
@@ -80,5 +89,27 @@ class ExampleRobolectricTest {
     val bitmap = ShareExportHelper.renderExportBitmap(payload, ShareExportMode.CHART)
     assertEquals(1080, bitmap.width)
     assertTrue(bitmap.height >= 900)
+  }
+
+  @Test
+  fun `firebaseApp initializes cleanly from resources and app check configures`() {
+    val context = ApplicationProvider.getApplicationContext<Context>()
+    assertTrue(
+      "hasFirebaseBuildConfigResources(context) should be true",
+      com.example.ai.hasFirebaseBuildConfigResources(context),
+    )
+    assertTrue(
+      "ensureFirebaseAppInitialized(context) should return true",
+      com.example.ai.ensureFirebaseAppInitialized(context),
+    )
+    val options = com.google.firebase.FirebaseOptions.fromResource(context)
+    assertTrue("FirebaseOptions.fromResource(context) should not be null", options != null)
+    com.example.ai.configureAppCheck(context, null)
+    assertTrue(
+      "FirebaseApp.getApps should not be empty",
+      com.google.firebase.FirebaseApp.getApps(context).isNotEmpty(),
+    )
+    val client = com.example.ai.VertoAiClient(context)
+    org.junit.Assert.assertNotNull(client)
   }
 }

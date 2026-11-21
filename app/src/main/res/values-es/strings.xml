@@ -151,4 +151,14 @@
     <string name="ai_prompt_metal_explain">Explicar oro y plata</string>
     <string name="ai_prompt_metal_predict">Predecir escenarios</string>
     <string name="ai_prompt_metal_purity">Comparar quilates</string>
+
+    <string name="find_any_unit_button">Buscar cualquier unidad o categoría…</string>
+    <string name="filter_units_hint">Filtrar unidades equivalentes…</string>
+    <string name="filter_all">Todas</string>
+    <string name="filter_popular">Populares</string>
+    <string name="filter_saved">Guardadas</string>
+    <string name="region_mena">Oriente Medio y África</string>
+    <string name="region_europe">Europa</string>
+    <string name="region_asia">Asia y Pacífico</string>
+    <string name="region_americas">América</string>
 </resources>

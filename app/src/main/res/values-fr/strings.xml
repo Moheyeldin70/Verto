@@ -151,4 +151,14 @@
     <string name="ai_prompt_metal_explain">Expliquer or &amp; argent</string>
     <string name="ai_prompt_metal_predict">Scénarios de prix</string>
     <string name="ai_prompt_metal_purity">Comparer les carats</string>
+
+    <string name="find_any_unit_button">Rechercher une unité ou catégorie…</string>
+    <string name="filter_units_hint">Filtrer les unités…</string>
+    <string name="filter_all">Toutes</string>
+    <string name="filter_popular">Populaires</string>
+    <string name="filter_saved">Enregistrées</string>
+    <string name="region_mena">MOAN &amp; Afrique</string>
+    <string name="region_europe">Europe</string>
+    <string name="region_asia">Asie-Pacifique</string>
+    <string name="region_americas">Amériques</string>
 </resources>

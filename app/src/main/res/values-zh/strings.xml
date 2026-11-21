@@ -166,4 +166,14 @@
     <string name="ai_prompt_metal_explain">解析金银走势</string>
     <string name="ai_prompt_metal_predict">价格情景预测</string>
     <string name="ai_prompt_metal_purity">纯度与价值对比</string>
+
+    <string name="find_any_unit_button">搜索任意单位或类别…</string>
+    <string name="filter_units_hint">筛选等效单位…</string>
+    <string name="filter_all">全部</string>
+    <string name="filter_popular">热门</string>
+    <string name="filter_saved">已保存</string>
+    <string name="region_mena">中东与非洲</string>
+    <string name="region_europe">欧洲</string>
+    <string name="region_asia">亚太地区</string>
+    <string name="region_americas">美洲</string>
 </resources>

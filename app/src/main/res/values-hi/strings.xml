@@ -151,4 +151,14 @@
     <string name="ai_prompt_metal_explain">सोना-चांदी चाल समझाएं</string>
     <string name="ai_prompt_metal_predict">मूल्य परिदृश्य अनुमान</string>
     <string name="ai_prompt_metal_purity">शुद्धता तुलना</string>
+
+    <string name="find_any_unit_button">कोई भी इकाई या श्रेणी खोजें…</string>
+    <string name="filter_units_hint">समतुल्य इकाइयाँ फ़िल्टर करें…</string>
+    <string name="filter_all">सभी</string>
+    <string name="filter_popular">लोकप्रिय</string>
+    <string name="filter_saved">सहेजी गई</string>
+    <string name="region_mena">मध्य पूर्व व अफ्रीका</string>
+    <string name="region_europe">यूरोप</string>
+    <string name="region_asia">एशिया-प्रशांत</string>
+    <string name="region_americas">अमेरिका</string>
 </resources>

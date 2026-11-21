@@ -1,5 +1,6 @@
 package com.example.ai
 
+import android.content.Context
 import com.example.data.local.CachedChartPointEntity
 import com.example.data.repository.SyncStatus
 import com.example.domain.FormattingUtils
@@ -180,8 +181,19 @@ object VertoAiContextBuilder {
   }
 }
 
-class VertoAiClient {
+class VertoAiClient(private val context: Context) {
+  private val appContext: Context = context.applicationContext ?: context
+
   private val model by lazy {
+    if (!ensureFirebaseAppInitialized(appContext)) {
+      val detail =
+        if (!hasFirebaseBuildConfigResources(appContext)) {
+          "Firebase configuration (google-services.json) is missing from this APK build. Rebuild with app/google-services.json included."
+        } else {
+          "Default FirebaseApp could not be initialized in this process."
+        }
+      throw IllegalStateException(detail)
+    }
     Firebase.ai.generativeModel(
       modelName = DEFAULT_MODEL_NAME,
       generationConfig =
@@ -210,6 +222,7 @@ class VertoAiClient {
     userPrompt: String,
     contextSnapshot: String,
   ): Flow<String> {
+    configureAppCheck(appContext, null)
     val sdkHistory: List<Content> =
       history
         .filter { !it.isStreaming && it.text.isNotBlank() }
