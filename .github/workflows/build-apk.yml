@@ -93,7 +93,7 @@ jobs:
               f.write(data)
           print(f"Decoded keystore ({len(data)} bytes).")
           PY
-            gradle :app:assembleRelease --no-daemon
+            gradle :app:assembleRelease --no-daemon --max-workers=2 || (sleep 10 && gradle :app:assembleRelease --no-daemon --max-workers=2)
             echo "built_release=true" >> "$GITHUB_OUTPUT"
           else
             echo "Signing secrets not configured; skipping release APK."
