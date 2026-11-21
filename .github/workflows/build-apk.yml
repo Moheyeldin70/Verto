@@ -68,7 +68,22 @@ jobs:
           fi
 
       - name: Run unit tests
-        run: gradle :app:testDebugUnitTest --no-daemon
+        run: gradle :app:testDebugUnitTest --no-daemon --stacktrace
+
+      - name: Print failed unit test details (if any)
+        if: failure()
+        run: |
+          python3 - <<'PY'
+          import glob, xml.etree.ElementTree as ET
+          for path in sorted(glob.glob("app/build/test-results/testDebugUnitTest/TEST-*.xml")):
+              tree = ET.parse(path)
+              for tc in tree.findall(".//testcase"):
+                  fail = tc.find("failure") or tc.find("error")
+                  if fail is not None:
+                      print(f"FAILED: {tc.attrib.get('classname')}.{tc.attrib.get('name')}")
+                      print(fail.attrib.get("message", ""))
+                      print(fail.text or "")
+          PY
 
       - name: Build Debug APK
         run: gradle :app:assembleDebug --no-daemon
