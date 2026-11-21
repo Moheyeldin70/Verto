@@ -44,7 +44,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CurrencyExchange
 import androidx.compose.material.icons.outlined.Diamond
 import androidx.compose.material.icons.outlined.Straighten
-import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.CurrencyExchange
 import androidx.compose.material.icons.rounded.Diamond
 import androidx.compose.material.icons.rounded.Refresh
@@ -52,7 +51,6 @@ import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material.icons.rounded.Straighten
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -103,13 +101,11 @@ import androidx.core.text.layoutDirection
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.R
-import com.example.ai.VertoAiContextBuilder
 import com.example.data.local.AppLanguage
 import com.example.data.local.NavBarPosition
 import com.example.data.local.ThemeMode
 import com.example.domain.CountryMetalsCatalog
 import com.example.domain.ShareExportHelper
-import com.example.ui.components.AiAssistantSheet
 import com.example.ui.components.SettingsSheet
 import com.example.ui.components.ShareExportSheet
 import com.example.ui.components.StatusPill
@@ -383,11 +379,9 @@ private fun VertoMainContent(
   val syncStatus by viewModel.syncStatus.collectAsStateWithLifecycle()
   val prefs by viewModel.userPreferences.collectAsStateWithLifecycle()
   val isDetectingLocation by viewModel.isDetectingLocation.collectAsStateWithLifecycle()
-  val aiState by viewModel.aiState.collectAsStateWithLifecycle()
 
   var showSettingsSheet by remember { mutableStateOf(false) }
   var showShareSheet by remember { mutableStateOf(false) }
-  var showAiSheet by remember { mutableStateOf(false) }
   var explicitLocationRequest by remember { mutableStateOf(false) }
   val snackbarHostState = remember { SnackbarHostState() }
   val scope = rememberCoroutineScope()
@@ -514,26 +508,6 @@ private fun VertoMainContent(
               containerColor = MaterialTheme.colorScheme.background,
               titleContentColor = MaterialTheme.colorScheme.onBackground,
             ),
-        )
-      },
-      floatingActionButton = {
-        ExtendedFloatingActionButton(
-          onClick = { showAiSheet = true },
-          icon = {
-            Icon(
-              imageVector = Icons.Rounded.AutoAwesome,
-              contentDescription = null,
-            )
-          },
-          text = {
-            Text(
-              text = stringResource(R.string.ai_fab_label),
-              fontWeight = FontWeight.SemiBold,
-            )
-          },
-          containerColor = MaterialTheme.colorScheme.primary,
-          contentColor = MaterialTheme.colorScheme.onPrimary,
-          modifier = Modifier.testTag("ai_assistant_button"),
         )
       },
       bottomBar = {
@@ -747,29 +721,6 @@ private fun VertoMainContent(
       payload = sharePayload,
       onShowMessage = showSnackbar,
       onDismiss = { showShareSheet = false },
-    )
-  }
-
-  if (showAiSheet) {
-    val contextLabel =
-      remember(activeTab, unitState, currencyState, metalsState, displayLocale) {
-        VertoAiContextBuilder.buildShortContextLabel(
-          activeTab = activeTab,
-          unitState = unitState,
-          currencyState = currencyState,
-          metalsState = metalsState,
-          displayLocale = displayLocale,
-        )
-      }
-    AiAssistantSheet(
-      activeTab = activeTab,
-      contextLabel = contextLabel,
-      isNetworkAvailable = syncStatus.isNetworkAvailable,
-      aiState = aiState,
-      onSendMessage = { prompt -> viewModel.sendAiMessage(prompt, displayLocale) },
-      onClearChat = viewModel::clearAiChat,
-      onDismissError = viewModel::dismissAiError,
-      onDismiss = { showAiSheet = false },
     )
   }
 }

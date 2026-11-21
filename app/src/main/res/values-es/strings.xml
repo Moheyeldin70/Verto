@@ -132,26 +132,6 @@
     <string name="share_as_image">Compartir imagen</string>
     <string name="share_error_message">No se pudo abrir el menú de compartir</string>
 
-    <string name="ai_fab_label">Preguntar IA</string>
-    <string name="ai_sheet_title">Analista IA Verto</string>
-    <string name="ai_welcome_title">Analiza, explica y pronostica</string>
-    <string name="ai_welcome_body">Consulta sobre tu conversión actual, factores cambiarios, pureza de metales o escenarios de precios.</string>
-    <string name="ai_input_hint">Pregunta sobre precios, tendencias o conversiones…</string>
-    <string name="ai_send">Enviar</string>
-    <string name="ai_thinking">Analizando…</string>
-    <string name="ai_retry">Reintentar</string>
-    <string name="ai_offline_notice">Sin conexión — conéctate para usar Verto IA.</string>
-    <string name="ai_disclaimer">El análisis de IA es solo informativo, no asesoramiento financiero.</string>
-    <string name="ai_prompt_unit_explain">Explica la fórmula</string>
-    <string name="ai_prompt_unit_realworld">Ejemplos reales</string>
-    <string name="ai_prompt_unit_compare">Comparar unidades</string>
-    <string name="ai_prompt_fx_explain">Explicar tendencia</string>
-    <string name="ai_prompt_fx_predict">Pronóstico del par</string>
-    <string name="ai_prompt_fx_tips">Consejos de cambio</string>
-    <string name="ai_prompt_metal_explain">Explicar oro y plata</string>
-    <string name="ai_prompt_metal_predict">Predecir escenarios</string>
-    <string name="ai_prompt_metal_purity">Comparar quilates</string>
-
     <string name="find_any_unit_button">Buscar cualquier unidad o categoría…</string>
     <string name="filter_units_hint">Filtrar unidades equivalentes…</string>
     <string name="filter_all">Todas</string>

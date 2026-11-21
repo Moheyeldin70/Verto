@@ -26,30 +26,19 @@ import com.example.domain.MeasurementSystem
 import com.example.domain.UnitCatalog
 import com.example.domain.UnitCategory
 import com.example.domain.UnitDef
-import android.util.Log
-import com.example.ai.AiAssistantState
-import com.example.ai.AiChatMessage
-import com.example.ai.AiUiState
-import com.example.ai.VertoAiClient
-import com.example.ai.VertoAiContextBuilder
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeout
 import java.util.Locale
-import java.util.concurrent.atomic.AtomicLong
 
 enum class AppTab {
   UNITS,
@@ -148,12 +137,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
   private var currencyPrefetchJob: Job? = null
   private var metalChartJob: Job? = null
   private var metalPrefetchJob: Job? = null
-  private var aiStreamJob: Job? = null
-  private val aiMsgIdGenerator = AtomicLong(1L)
-  private val aiClient by lazy { VertoAiClient(getApplication()) }
-
-  private val _aiState = MutableStateFlow(AiAssistantState())
-  val aiState: StateFlow<AiAssistantState> = _aiState.asStateFlow()
 
   val userPreferences =
     prefsRepo.preferences.stateIn(
@@ -668,147 +651,5 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
   fun setBullionPurity(fraction: Double) {
     _metalsState.update { it.copy(calculatorPurityFraction = fraction) }
-  }
-
-  // ---- Verto AI Analyst Actions ----
-  fun sendAiMessage(
-    prompt: String,
-    displayLocale: Locale,
-  ) {
-    val trimmed = prompt.trim()
-    if (trimmed.isEmpty()) return
-
-    aiStreamJob?.cancel()
-
-    val tab = _activeTab.value
-    val contextLabel =
-      VertoAiContextBuilder.buildShortContextLabel(
-        activeTab = tab,
-        unitState = _unitState.value,
-        currencyState = _currencyState.value,
-        metalsState = _metalsState.value,
-        displayLocale = displayLocale,
-      )
-    val snapshot =
-      VertoAiContextBuilder.buildContextSnapshot(
-        activeTab = tab,
-        unitState = _unitState.value,
-        currencyState = _currencyState.value,
-        metalsState = _metalsState.value,
-        ratesMap = currencyRatesMap.value,
-        syncStatus = syncStatus.value,
-        displayLocale = displayLocale,
-      )
-
-    val historyBefore = _aiState.value.messages
-    val userMessage =
-      AiChatMessage(
-        id = aiMsgIdGenerator.getAndIncrement(),
-        isUser = true,
-        text = trimmed,
-        isStreaming = false,
-        contextLabel = contextLabel,
-      )
-    val assistantMsgId = aiMsgIdGenerator.getAndIncrement()
-    val placeholderReply =
-      AiChatMessage(
-        id = assistantMsgId,
-        isUser = false,
-        text = "",
-        isStreaming = true,
-        contextLabel = contextLabel,
-      )
-
-    _aiState.update {
-      it.copy(
-        uiState = AiUiState.Loading,
-        messages = it.messages + userMessage + placeholderReply,
-      )
-    }
-
-    aiStreamJob =
-      viewModelScope.launch {
-        val accumulated = StringBuilder()
-        try {
-          withTimeout(60_000L) {
-            aiClient
-              .streamReply(
-                history = historyBefore,
-                userPrompt = trimmed,
-                contextSnapshot = snapshot,
-              )
-              .collect { chunk ->
-                if (chunk.isNotEmpty()) {
-                  accumulated.append(chunk)
-                  val partial = accumulated.toString()
-                  _aiState.update { state ->
-                    state.copy(
-                      uiState = AiUiState.Streaming(partial),
-                      messages =
-                        state.messages.map { m ->
-                          if (m.id == assistantMsgId) m.copy(text = partial, isStreaming = true) else m
-                        },
-                    )
-                  }
-                }
-              }
-          }
-
-          val finalText = accumulated.toString().trim()
-          if (finalText.isNotEmpty()) {
-            _aiState.update { state ->
-              state.copy(
-                uiState = AiUiState.Success(finalText),
-                messages =
-                  state.messages.map { m ->
-                    if (m.id == assistantMsgId) m.copy(text = finalText, isStreaming = false) else m
-                  },
-              )
-            }
-          } else {
-            removeAssistantPlaceholder(assistantMsgId, "Model returned an empty response.")
-          }
-        } catch (e: TimeoutCancellationException) {
-          Log.e("MainViewModel", "Verto AI request timed out", e)
-          removeAssistantPlaceholder(
-            assistantMsgId,
-            "Request timed out after 60 seconds. Please check your connection and try again.",
-          )
-        } catch (e: CancellationException) {
-          throw e
-        } catch (e: Exception) {
-          Log.e("MainViewModel", "Verto AI generation failed", e)
-          removeAssistantPlaceholder(
-            assistantMsgId,
-            e.localizedMessage ?: "Unable to reach Verto AI. Please try again.",
-          )
-        }
-      }
-  }
-
-  private fun removeAssistantPlaceholder(
-    assistantMsgId: Long,
-    errorMessage: String,
-  ) {
-    _aiState.update { state ->
-      val updatedMessages =
-        state.messages.filterNot { it.id == assistantMsgId && it.text.isBlank() }
-          .map { m -> if (m.id == assistantMsgId) m.copy(isStreaming = false) else m }
-      state.copy(
-        uiState = AiUiState.Error(errorMessage),
-        messages = updatedMessages,
-      )
-    }
-  }
-
-  fun clearAiChat() {
-    aiStreamJob?.cancel()
-    _aiState.value = AiAssistantState()
-  }
-
-  fun dismissAiError() {
-    _aiState.update {
-      if (it.uiState is AiUiState.Error) it.copy(uiState = AiUiState.Idle) else it
-    }
   }
 }

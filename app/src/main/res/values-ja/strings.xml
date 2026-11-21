@@ -147,26 +147,6 @@
     <string name="share_as_image">画像を共有</string>
     <string name="share_error_message">共有画面を開けませんでした</string>
 
-    <string name="ai_fab_label">AIに聞く</string>
-    <string name="ai_sheet_title">Verto AIアナリスト</string>
-    <string name="ai_welcome_title">解説・分析・予測</string>
-    <string name="ai_welcome_body">現在の換算式、為替動向の背景、金・銀の純度別価格、トレンドに基づく予測シナリオを質問できます。</string>
-    <string name="ai_input_hint">価格・トレンド・換算について質問…</string>
-    <string name="ai_send">送信</string>
-    <string name="ai_thinking">分析中…</string>
-    <string name="ai_retry">再試行</string>
-    <string name="ai_offline_notice">オフライン中 — AIを利用するには接続してください。</string>
-    <string name="ai_disclaimer">AI分析は参考情報であり、投資助言ではありません。</string>
-    <string name="ai_prompt_unit_explain">換算式を解説</string>
-    <string name="ai_prompt_unit_realworld">身近な例え</string>
-    <string name="ai_prompt_unit_compare">他の単位と比較</string>
-    <string name="ai_prompt_fx_explain">トレンドを解説</string>
-    <string name="ai_prompt_fx_predict">今後の見通し</string>
-    <string name="ai_prompt_fx_tips">両替のコツ</string>
-    <string name="ai_prompt_metal_explain">金・銀の動きを解説</string>
-    <string name="ai_prompt_metal_predict">価格シナリオ予測</string>
-    <string name="ai_prompt_metal_purity">純度別の比較</string>
-
     <string name="find_any_unit_button">すべての単位・カテゴリから検索…</string>
     <string name="filter_units_hint">換算リストを絞り込む…</string>
     <string name="filter_all">すべて</string>

@@ -149,27 +149,6 @@
     <string name="share_as_image">مشاركة كصورة</string>
     <string name="share_error_message">تعذر فتح نافذة المشاركة</string>
 
-    <!-- Verto AI Analyst -->
-    <string name="ai_fab_label">اسأل AI</string>
-    <string name="ai_sheet_title">محلل Verto الذكي</string>
-    <string name="ai_welcome_title">ناقش وفسّر وتوقّع الأسعار</string>
-    <string name="ai_welcome_body">اسأل عن التحويل الحالي، أسباب تغير أسعار الصرف، عيارات الذهب والفضة، أو توقعات الأسعار المبنية على الاتجاهات.</string>
-    <string name="ai_input_hint">اسأل عن الأسعار أو التوقعات أو التحويلات…</string>
-    <string name="ai_send">إرسال</string>
-    <string name="ai_thinking">جاري التحليل…</string>
-    <string name="ai_retry">إعادة المحاولة</string>
-    <string name="ai_offline_notice">يبدو أنك غير متصل — اتصل بالإنترنت لسؤال المساعد الذكي.</string>
-    <string name="ai_disclaimer">تحليلات وتوقعات الذكاء الاصطناعي استرشادية فقط وليست نصيحة مالية.</string>
-    <string name="ai_prompt_unit_explain">اشرح معادلة التحويل</string>
-    <string name="ai_prompt_unit_realworld">أمثلة من الواقع</string>
-    <string name="ai_prompt_unit_compare">قارن بالوحدات الأخرى</string>
-    <string name="ai_prompt_fx_explain">فسّر هذا الاتجاه</string>
-    <string name="ai_prompt_fx_predict">توقعات السعر القادمة</string>
-    <string name="ai_prompt_fx_tips">نصائح عمولات التحويل</string>
-    <string name="ai_prompt_metal_explain">فسّر حركة الذهب والفضة</string>
-    <string name="ai_prompt_metal_predict">توقع سيناريوهات الأسعار</string>
-    <string name="ai_prompt_metal_purity">قارن العيارات والقيمة</string>
-
     <!-- Searchable Unit & Currency Pickers / Filterable Lists -->
     <string name="find_any_unit_button">ابحث عن أي وحدة أو فئة…</string>
     <string name="filter_units_hint">تصفية الوحدات المكافئة…</string>

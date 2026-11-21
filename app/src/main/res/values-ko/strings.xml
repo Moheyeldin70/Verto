@@ -132,26 +132,6 @@
     <string name="share_as_image">이미지 공유</string>
     <string name="share_error_message">공유 화면을 열 수 없습니다</string>
 
-    <string name="ai_fab_label">AI 질문</string>
-    <string name="ai_sheet_title">Verto AI 애널리스트</string>
-    <string name="ai_welcome_title">토론, 설명 및 전망</string>
-    <string name="ai_welcome_body">현재 변환 공식, 환율 변동 요인, 금·은 순도별 시세 및 추세 기반 시나리오 전망을 질문하세요.</string>
-    <string name="ai_input_hint">가격, 추세 또는 변환에 대해 질문…</string>
-    <string name="ai_send">전송</string>
-    <string name="ai_thinking">분석 중…</string>
-    <string name="ai_retry">재시도</string>
-    <string name="ai_offline_notice">오프라인 상태입니다 — AI를 사용하려면 연결하세요.</string>
-    <string name="ai_disclaimer">AI 분석은 참고용이며 투자 자문이 아닙니다.</string>
-    <string name="ai_prompt_unit_explain">변환 공식 설명</string>
-    <string name="ai_prompt_unit_realworld">실생활 예시</string>
-    <string name="ai_prompt_unit_compare">다른 단위 비교</string>
-    <string name="ai_prompt_fx_explain">환율 추세 설명</string>
-    <string name="ai_prompt_fx_predict">환율 전망 예측</string>
-    <string name="ai_prompt_fx_tips">환전 팁</string>
-    <string name="ai_prompt_metal_explain">금·은 시세 설명</string>
-    <string name="ai_prompt_metal_predict">가격 시나리오 예측</string>
-    <string name="ai_prompt_metal_purity">순도별 비교</string>
-
     <string name="find_any_unit_button">모든 단위 또는 카테고리 검색…</string>
     <string name="filter_units_hint">환산 단위 필터…</string>
     <string name="filter_all">전체</string>

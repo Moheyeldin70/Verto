@@ -1,6 +1,5 @@
 package com.example
 
-import com.example.ai.VertoAiContextBuilder
 import com.example.data.local.AppLanguage
 import com.example.data.local.CachedChartPointEntity
 import com.example.data.local.NavBarPosition
@@ -205,34 +204,6 @@ class ExampleUnitTest {
     assertTrue(fxPayload.textSummary.contains("USD"))
     assertTrue(fxPayload.textSummary.contains("EUR"))
     assertTrue(fxPayload.textSummary.contains("+5.56%"))
-  }
-
-  @Test
-  fun aiContextBuilder_formatsLiveSnapshotForCurrencyAndMetals() {
-    val label =
-      VertoAiContextBuilder.buildShortContextLabel(
-        activeTab = AppTab.METALS,
-        unitState = UnitConverterState(),
-        currencyState = CurrencyConverterState(),
-        metalsState = MetalsTrackerState(selectedMetal = MetalType.GOLD, selectedCountry = CountryMetalsCatalog.find("EG")),
-        displayLocale = Locale.US,
-      )
-    assertTrue(label.contains("Gold (XAU)"))
-    assertTrue(label.contains("EGP"))
-
-    val snapshot =
-      VertoAiContextBuilder.buildContextSnapshot(
-        activeTab = AppTab.METALS,
-        unitState = UnitConverterState(),
-        currencyState = CurrencyConverterState(),
-        metalsState = MetalsTrackerState(selectedMetal = MetalType.GOLD, selectedCountry = CountryMetalsCatalog.find("EG")),
-        ratesMap = mapOf("EGP" to 49.3),
-        syncStatus = SyncStatus(isLive = false, isSyncing = false, isNetworkAvailable = false, lastUpdatedMillis = 1_700_864_000_000L),
-        displayLocale = Locale.forLanguageTag("ar"),
-      )
-    assertTrue(snapshot.contains("Gold (XAU)"))
-    assertTrue(snapshot.contains("Offline"))
-    assertTrue(snapshot.contains("EGP"))
   }
 
   @Test

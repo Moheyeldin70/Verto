@@ -13,8 +13,6 @@ import com.example.ui.CurrencyConverterState
 import com.example.ui.MetalsTrackerState
 import com.example.ui.UnitConverterState
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -49,8 +47,6 @@ class ExampleRobolectricTest {
       assertTrue(localizedRes.getString(R.string.range_5y).isNotBlank())
       assertTrue(localizedRes.getString(R.string.graph_unit_gold_coin).isNotBlank())
       assertTrue(localizedRes.getString(R.string.share_sheet_title).isNotBlank())
-      assertTrue(localizedRes.getString(R.string.ai_sheet_title).isNotBlank())
-      assertTrue(localizedRes.getString(R.string.ai_prompt_fx_predict).isNotBlank())
       assertTrue(localizedRes.getString(R.string.find_any_unit_button).isNotBlank())
       assertTrue(localizedRes.getString(R.string.filter_units_hint).isNotBlank())
       assertTrue(localizedRes.getString(R.string.filter_all).isNotBlank())
@@ -91,31 +87,5 @@ class ExampleRobolectricTest {
     val bitmap = ShareExportHelper.renderExportBitmap(payload, ShareExportMode.CHART)
     assertEquals(1080, bitmap.width)
     assertTrue(bitmap.height >= 900)
-  }
-
-  @Test
-  fun `firebaseApp initializes cleanly when configured or degrades gracefully without config`() {
-    val context = ApplicationProvider.getApplicationContext<Context>()
-    if (com.example.ai.hasFirebaseBuildConfigResources(context)) {
-      assertTrue(
-        "ensureFirebaseAppInitialized(context) should return true",
-        com.example.ai.ensureFirebaseAppInitialized(context),
-      )
-      val options = com.google.firebase.FirebaseOptions.fromResource(context)
-      assertNotNull("FirebaseOptions.fromResource(context) should not be null", options)
-      com.example.ai.configureAppCheck(context, null)
-      assertTrue(
-        "FirebaseApp.getApps should not be empty",
-        com.google.firebase.FirebaseApp.getApps(context).isNotEmpty(),
-      )
-    } else {
-      assertFalse(
-        "ensureFirebaseAppInitialized(context) should return false without google-services.json",
-        com.example.ai.ensureFirebaseAppInitialized(context),
-      )
-      com.example.ai.configureAppCheck(context, null)
-    }
-    val client = com.example.ai.VertoAiClient(context)
-    assertNotNull(client)
   }
 }
